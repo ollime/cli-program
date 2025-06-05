@@ -1,7 +1,12 @@
 [package]
 name = "cli-rs"
 version = "0.1.0"
+description = "An example generated using the simple template"
+authors = ["Jennie Long <longjen100@gmail.com>"]
+license = "MIT"
 edition = "2024"
 
 [dependencies]
-rand = "0.9.0"
+crossterm = "0.28.1"
+ratatui = "0.29.0"
+color-eyre = "0.6.3"
