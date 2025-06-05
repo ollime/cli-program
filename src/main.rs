@@ -21,6 +21,7 @@ fn main() -> color_eyre::Result<()> {
 pub struct App {
     /// Is the application running?
     running: bool,
+    counter: u8,
 }
 
 impl App {
@@ -55,6 +56,7 @@ impl App {
             Press `Esc`, `Ctrl-C` or `q` to stop running.";
         let text = Text::from(vec![
             Line::from(helloText).yellow(),
+            Line::from(self.counter.to_string()).blue(),
             Line::from("this is a test"),
         ]);
 
@@ -90,9 +92,11 @@ impl App {
     /// Handles the key events and updates the state of [`App`].
     fn on_key_event(&mut self, key: KeyEvent) {
         match (key.modifiers, key.code) {
+            // Exits the program
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            // Add other key handlers here.
+            // Increment counter
+            (_, KeyCode::Right) => self.increment_counter(),
             _ => {}
         }
     }
@@ -100,5 +104,18 @@ impl App {
     /// Set running to false to quit the application.
     fn quit(&mut self) {
         self.running = false;
+    }
+
+    fn increment_counter(&mut self) {
+        self.counter += 1;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn render() {
+        // TODO
     }
 }
