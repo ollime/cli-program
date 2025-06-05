@@ -8,6 +8,6 @@ mod tests {
 
         app.render(buf.area, &mut buf);
 
-        // TOOD: test the rendered app
+        // TODO: test the rendered app
     }
 }

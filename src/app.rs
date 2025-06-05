@@ -1,6 +1,9 @@
 use color_eyre::Result;
 use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use ratatui::{
+    widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs},
+};
 
 /// The main application which holds the state and logic of the application.
 #[derive(Debug, Default)]
