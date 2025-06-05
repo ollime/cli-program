@@ -3,8 +3,9 @@ use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifier
 use ratatui::{
     DefaultTerminal, Frame,
     style::Stylize,
-    text::Line,
-    widgets::{Block, Paragraph},
+    text::{Line, Text},
+    widgets::{Block, Paragraph, Padding, Wrap},
+    symbols:: border,
 };
 
 fn main() -> color_eyre::Result<()> {
@@ -49,15 +50,26 @@ impl App {
             .bold()
             .blue()
             .centered();
-        let text = "Hello, Ratatui!\n\n\
+        let helloText = "Hello, Ratatui!\n\n\
             Created using https://github.com/ratatui/templates\n\
             Press `Esc`, `Ctrl-C` or `q` to stop running.";
+        let text = Text::from(vec![
+            Line::from(helloText).yellow(),
+            Line::from("this is a test"),
+        ]);
+
+        let block = Block::bordered()
+            .border_set(border::ROUNDED)
+            .padding(Padding::new(5, 5, 5, 5))
+            .title(title);
+
         frame.render_widget(
             Paragraph::new(text)
-                .block(Block::bordered().title(title))
+                .block(block)
+                .wrap(Wrap {trim: true})
                 .centered(),
             frame.area(),
-        )
+        );
     }
 
     /// Reads the crossterm events and updates the state of [`App`].
