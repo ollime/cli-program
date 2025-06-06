@@ -23,6 +23,7 @@ pub struct App {
     pub counter: u8,
     pub current_screen: CurrentScreen,
     pub input_value: String,
+    pub can_edit: bool,
 }
 
 impl App {
@@ -32,7 +33,8 @@ impl App {
             running: true,
             counter: 0,
             current_screen: CurrentScreen::main,
-            input_value: String::from("initial value")
+            input_value: String::from("initial value"),
+            can_edit: true,
         }
     }
 
@@ -67,13 +69,26 @@ impl App {
             // Exits the program
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            // Increment counter
-            (_, KeyCode::Right) => self.increment_counter(),
+            
             // (_, KeyCode::Char('l')) => self.next_tab(),
             // (_, KeyCode::Char('h')) => self.previous_tab(),
-            (_, KeyCode::Char(value)) => self.input_value.push(value),
+            
+            // Increment counter
+            (_, KeyCode::Right) => self.increment_counter(),
+            
+            // TODO: implement better way to enter edit mode
+            (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
+                self.can_edit = !self.can_edit;
+            },
+            (_, KeyCode::Char(value)) => {
+                if self.can_edit {
+                    self.input_value.push(value);
+                }
+            },
             (_, KeyCode::Backspace) => {
-                self.input_value.pop();
+                if self.can_edit {
+                    self.input_value.pop();
+                }
             },
             _ => {}
         }
