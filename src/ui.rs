@@ -43,13 +43,18 @@ impl Widget for &App {
             .border_set(border::ROUNDED)
             .padding(Padding::new(5, 5, 5, 5));
         let outer_area = area;
+        // By defining inner_area inside of outer_block, the rendered inner_block
+        // will be inside of outer_block.
         let inner_area = outer_block.inner(outer_area); // gets area inside of outer_block
-        inner_block.render(inner_area, buf); // renders inner_area in outer_block
+        
+        // Renders text inside of inner_block
+        let paragraph = Paragraph::new(content)
+            .wrap(Wrap {trim: true})
+            .centered();
+        let paragraph_area = inner_block.inner(inner_area);
 
-        // let paragraph = Paragraph::new(content)
-        //     .block(block)
-        //     .wrap(Wrap {trim: true})
-        //     .centered();
+        inner_block.render(inner_area, buf); // renders inner_block in outer_block
+        paragraph.render(paragraph_area, buf); // renders paragraph in inner_block
 
         let tabs = Tabs::new(vec!["tab1".red(), "tab2".blue(), "tab3".yellow()])
             .block(outer_block)
