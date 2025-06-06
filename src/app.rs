@@ -69,12 +69,13 @@ impl App {
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             // Increment counter
             (_, KeyCode::Right) => self.increment_counter(),
-            _ => {}
-            (_, KeyCode::Char('l')) => self.next_tab(),
-            (_, KeyCode::Char('h')) => self.previous_tab(),
-            (_, KeyCode::Char(value)) => {
-                self.input_value.push(value)
+            // (_, KeyCode::Char('l')) => self.next_tab(),
+            // (_, KeyCode::Char('h')) => self.previous_tab(),
+            (_, KeyCode::Char(value)) => self.input_value.push(value),
+            (_, KeyCode::Backspace) => {
+                self.input_value.pop();
             },
+            _ => {}
         }
     }
 

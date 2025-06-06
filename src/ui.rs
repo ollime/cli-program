@@ -17,7 +17,7 @@ impl Widget for &App {
     /// - <https://docs.rs/ratatui/latest/ratatui/widgets/index.html>
     /// - <https://github.com/ratatui/ratatui/tree/main/ratatui-widgets/examples>
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from("Ratatui Simple Template")
+        let title = Line::from("TUI program title")
         .bold()
         .blue()
         .centered();
