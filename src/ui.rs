@@ -48,7 +48,7 @@ impl Widget for &App {
         let inner_area = outer_block.inner(outer_area); // gets area inside of outer_block
         
         // Renders text inside of inner_block
-        let paragraph = Paragraph::new(content)
+        let paragraph = Paragraph::new(Text::from(self.input_value.as_str()))
             .wrap(Wrap {trim: true})
             .centered();
         let paragraph_area = inner_block.inner(inner_area);

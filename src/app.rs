@@ -22,6 +22,7 @@ pub struct App {
     running: bool,
     pub counter: u8,
     pub current_screen: CurrentScreen,
+    pub input_value: String,
 }
 
 impl App {
@@ -31,6 +32,7 @@ impl App {
             running: true,
             counter: 0,
             current_screen: CurrentScreen::main,
+            input_value: String::from("initial value")
         }
     }
 
@@ -70,6 +72,9 @@ impl App {
             _ => {}
             (_, KeyCode::Char('l')) => self.next_tab(),
             (_, KeyCode::Char('h')) => self.previous_tab(),
+            (_, KeyCode::Char(value)) => {
+                self.input_value.push(value)
+            },
         }
     }
 
