@@ -5,18 +5,33 @@ use ratatui::{
     widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs},
 };
 
+pub enum CurrentScreen {
+    main,
+    Tab1,
+    Tab2
+}
+
+pub enum TextData {
+    Value
+}
+
 /// The main application which holds the state and logic of the application.
-#[derive(Debug, Default)]
+// #[derive(Debug, Default)]
 pub struct App {
     /// Is the application running?
     running: bool,
     pub counter: u8,
+    pub current_screen: CurrentScreen,
 }
 
 impl App {
     /// Construct a new instance of [`App`].
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            running: true,
+            counter: 0,
+            current_screen: CurrentScreen::main,
+        }
     }
 
     /// Run the application's main loop.
@@ -53,6 +68,8 @@ impl App {
             // Increment counter
             (_, KeyCode::Right) => self.increment_counter(),
             _ => {}
+            (_, KeyCode::Char('l')) => self.next_tab(),
+            (_, KeyCode::Char('h')) => self.previous_tab(),
         }
     }
 
@@ -63,5 +80,14 @@ impl App {
 
     fn increment_counter(&mut self) {
         self.counter += 1;
+    }
+
+    // TODO: install strum
+    pub fn next_tab(&mut self) {
+        // self.current_screen = self.current_screen.next();
+    }
+
+    pub fn previous_tab(&mut self) {
+        // self.current_screen = self.current_screen.previous();
     }
 }
