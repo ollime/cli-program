@@ -1,14 +1,17 @@
 use color_eyre::Result;
 use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use ratatui::{
-    widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs},
-};
+use strum_macros::{Display, EnumIter, FromRepr};
 
+#[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum CurrentScreen {
-    main,
+    #[default]
+    #[strum(to_string = "Tab 1")]
     Tab1,
-    Tab2
+    #[strum(to_string = "Tab 2")]
+    Tab2,
+    #[strum(to_string = "Tab 3")]
+    Tab3,
 }
 
 pub enum TextData {
@@ -32,7 +35,7 @@ impl App {
         Self {
             running: true,
             counter: 0,
-            current_screen: CurrentScreen::main,
+            current_screen: CurrentScreen::Tab1,
             input_value: String::from("initial value"),
             can_edit: true,
         }
@@ -70,11 +73,11 @@ impl App {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             
-            // (_, KeyCode::Char('l')) => self.next_tab(),
-            // (_, KeyCode::Char('h')) => self.previous_tab(),
+            (_, KeyCode::Right) => self.next_tab(),
+            (_, KeyCode::Left) => self.previous_tab(),
             
             // Increment counter
-            (_, KeyCode::Right) => self.increment_counter(),
+            // (_, KeyCode::Right) => self.increment_counter(),
             
             // TODO: implement better way to enter edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
@@ -105,10 +108,24 @@ impl App {
 
     // TODO: install strum
     pub fn next_tab(&mut self) {
-        // self.current_screen = self.current_screen.next();
+        self.current_screen = self.current_screen.next();
     }
 
     pub fn previous_tab(&mut self) {
-        // self.current_screen = self.current_screen.previous();
+        self.current_screen = self.current_screen.previous();
+    }
+}
+
+impl CurrentScreen {
+    fn previous(self) -> Self {
+        let current_index: usize = self as usize;
+        let previous_index = current_index.saturating_sub(1);
+        Self::from_repr(previous_index).unwrap_or(self)
+    }
+
+    fn next(self) -> Self {
+        let current_index = self as usize;
+        let next_index = current_index.saturating_add(1);
+        Self::from_repr(next_index).unwrap_or(self)
     }
 }
