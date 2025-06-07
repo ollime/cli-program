@@ -36,7 +36,7 @@ impl App {
         Self {
             running: true,
             current_screen: CurrentScreen::Main,
-            input_value: String::from("initial value"),
+            input_value: String::new(),
             can_edit: true,
         }
     }

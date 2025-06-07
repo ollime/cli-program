@@ -1,8 +1,9 @@
 use ratatui::{
-    text::{Text},
+    text::{Line, Span},
     widgets::{Widget, Paragraph, Wrap},
     buffer::Buffer,
     layout::Rect,
+    style::{Style, Modifier, Color},
 };
 
 pub struct TextInput<'a> {
@@ -19,9 +20,21 @@ impl<'a> TextInput<'a> {
 
 impl<'a> Widget for TextInput<'a> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        Paragraph::new(Text::from(self.input_value.as_str()))
+        let content = Line::from(
+            vec![
+                Span::from(self.input_value.as_str()),
+                Span::from(String::from("|"))
+                    .style(
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::RAPID_BLINK)
+                        ),
+            ]
+        );
+        
+        Paragraph::new(content)
             .wrap(Wrap {trim: true})
             .centered()
             .render(area, buf);
-    }
+        }
 }
