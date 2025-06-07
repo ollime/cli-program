@@ -73,9 +73,21 @@ impl App {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             
-            (_, KeyCode::Right | KeyCode::Char('[')) => self.next_tab(),
-            (_, KeyCode::Left | KeyCode::Char(']')) => self.previous_tab(),
-                        
+            (_, KeyCode::Char('[')) => self.previous_tab(),
+            (_, KeyCode::Char(']')) => self.next_tab(),
+            
+            // TODO: move cursor back/forwards
+            (_, KeyCode::Left) => {
+                if !self.can_edit {
+                    self.previous_tab()
+                }
+            }
+            (_, KeyCode::Right) => {
+                if !self.can_edit {
+                    self.next_tab()
+                }
+            }
+
             // TODO: implement better way to enter edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
@@ -99,7 +111,6 @@ impl App {
         self.running = false;
     }
 
-    // TODO: install strum
     pub fn next_tab(&mut self) {
         self.current_screen = self.current_screen.next();
     }

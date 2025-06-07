@@ -35,9 +35,11 @@ impl Widget for &App {
                 true => "on",
                 false => "off"
             })).right_aligned());
+
         let inner_block = Block::bordered()
             .border_set(border::ROUNDED)
-            .padding(Padding::new(5, 5, 5, 5));
+            .padding(Padding::new(2, 2, 1, 1));
+        
         // By defining inner_area inside of outer_block, the rendered inner_block
         // will be inside of outer_block.
         let inner_area = outer_block.inner(area); // gets area inside of outer_block
@@ -52,10 +54,22 @@ impl Widget for &App {
         self.render_tabs(inner_area, buf);
         match self.current_screen {
             CurrentScreen::Main => self.current_screen.render_main_tab(paragraph_area, buf),
-            CurrentScreen::Tab1 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("tab1")),
-            CurrentScreen::Tab2 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("test")),
-            CurrentScreen::Tab3 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("test")),
+            CurrentScreen::Tab1 => self.current_screen.render_tab(self, paragraph_area, buf),
+            CurrentScreen::Tab2 => self.current_screen.render_tab(self, paragraph_area, buf),
+            CurrentScreen::Tab3 => self.current_screen.render_tab(self, paragraph_area, buf),
         }
+    }
+}
+
+impl App {
+    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
+        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
+        let current_screen_index = self.current_screen as usize;
+        Tabs::new(tab_titles)
+            .select(current_screen_index) // sets tab index
+            .divider(symbols::DOT)
+            .padding("->", "<-")
+            .render(area, buf);
     }
 }
 
@@ -83,23 +97,8 @@ impl CurrentScreen {
             .render(area, buf);
     }
     
-    fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer, text: String) {
+    fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
         TextInput::new(&app.input_value)
-            .render(area, buf);
-
-        Paragraph::new(text)
-            .render(area, buf);
-    }
-}
-
-impl App {
-    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
-        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
-        let current_screen_index = self.current_screen as usize;
-        Tabs::new(tab_titles)
-            .select(current_screen_index) // sets tab index
-            .divider(symbols::DOT)
-            .padding("->", "<-")
             .render(area, buf);
     }
 }

@@ -23,6 +23,7 @@ impl<'a> Widget for TextInput<'a> {
         let content = Line::from(
             vec![
                 Span::from(self.input_value.as_str()),
+                // adds blinking cursor to screen
                 Span::from(String::from("|"))
                     .style(
                         Style::default()
@@ -34,7 +35,6 @@ impl<'a> Widget for TextInput<'a> {
         
         Paragraph::new(content)
             .wrap(Wrap {trim: true})
-            .centered()
             .render(area, buf);
         }
 }
