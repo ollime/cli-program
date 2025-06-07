@@ -117,7 +117,20 @@ impl App {
             },
             (_, KeyCode::Backspace) => {
                 if self.can_edit {
-                    self.input_value.pop();
+                    let current_tab_index = self.current_screen as usize;
+                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+
+                    if current_tab_data.len() > 0 {
+                        let new_content = current_tab_data
+                            .strip_suffix(|_: char| true)
+                            .unwrap()
+                            .to_string();
+    
+                        self.tab_data.insert(
+                            current_tab_index,
+                            new_content
+                        );
+                    }
                 }
             },
             _ => {}
