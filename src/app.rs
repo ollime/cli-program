@@ -53,7 +53,6 @@ impl App {
             );
         });
 
-
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
             self.handle_crossterm_events()?;
@@ -102,9 +101,18 @@ impl App {
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
             },
+
+            // editing text input
             (_, KeyCode::Char(value)) => {
                 if self.can_edit {
-                    self.input_value.push(value);
+                    let current_tab_index = self.current_screen as usize;
+                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                    let new_content = current_tab_data.clone() + &value.to_string();
+                    
+                    self.tab_data.insert(
+                        current_tab_index,
+                        new_content
+                    );
                 }
             },
             (_, KeyCode::Backspace) => {
@@ -127,10 +135,6 @@ impl App {
 
     pub fn previous_tab(&mut self) {
         self.current_screen = self.current_screen.previous();
-    }
-
-    pub fn get_input_value(&self) -> &str {
-        &self.input_value
     }
 }
 
