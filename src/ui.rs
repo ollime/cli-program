@@ -10,6 +10,7 @@ use strum::IntoEnumIterator;
 
 use crate::app::App;
 use crate::app::CurrentScreen;
+use crate::text_input::TextInput;
 
 impl Widget for &App {
     /// Renders the user interface.
@@ -44,20 +45,11 @@ impl Widget for &App {
         // paragraph.render(paragraph_area, buf); // renders paragraph in inner_block
 
         self.render_tabs(inner_area, buf);
-        self.current_screen.render(paragraph_area, buf);
-    }
-}
-
-impl Widget for CurrentScreen {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-                // let paragraph = Paragraph::new(Text::from(self.input_value.as_str()))
-        //     .wrap(Wrap {trim: true})
-        //     .centered();
-        match self {
-            Self::Main => self.render_main_tab(area, buf),
-            Self::Tab1 => self.render_tab(area, buf, String::from("tab1")),
-            Self::Tab2 => self.render_tab(area, buf, String::from("test")),
-            Self::Tab3 => self.render_tab(area, buf, String::from("!!!")),
+        match self.current_screen {
+            CurrentScreen::Main => self.current_screen.render_main_tab(paragraph_area, buf),
+            CurrentScreen::Tab1 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("tab1")),
+            CurrentScreen::Tab2 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("test")),
+            CurrentScreen::Tab3 => self.current_screen.render_tab(self, paragraph_area, buf, String::from("test")),
         }
     }
 }
@@ -85,9 +77,11 @@ impl CurrentScreen {
             .centered()
             .render(area, buf);
     }
+    
+    fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer, text: String) {
+        TextInput::new(&app.input_value)
+            .render(area, buf);
 
-    // content for each tab
-    fn render_tab(self, area: Rect, buf: &mut Buffer, text: String) {
         Paragraph::new(text)
             .render(area, buf);
     }
