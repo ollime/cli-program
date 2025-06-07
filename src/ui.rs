@@ -29,7 +29,12 @@ impl Widget for &App {
         let outer_block = Block::bordered()
             .border_set(border::ROUNDED)
             .padding(Padding::horizontal(1))
-            .title(title);
+            .title(title)
+            // TODO: green on and red off
+            .title(Line::from(format!("edit mode: {}", match self.can_edit {
+                true => "on",
+                false => "off"
+            })).right_aligned());
         let inner_block = Block::bordered()
             .border_set(border::ROUNDED)
             .padding(Padding::new(5, 5, 5, 5));
