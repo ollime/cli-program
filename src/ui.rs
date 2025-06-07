@@ -98,7 +98,9 @@ impl CurrentScreen {
     }
     
     fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
-        TextInput::new(&app.input_value)
+        let data = app.tab_data.get(&0).cloned().unwrap_or_default();
+
+        TextInput::new(&data)
             .render(area, buf);
     }
 }

@@ -2,6 +2,8 @@ use color_eyre::Result;
 use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use strum_macros::{Display, EnumIter, FromRepr};
+use strum::IntoEnumIterator;
+use std::collections::HashMap;
 
 #[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum CurrentScreen {
@@ -16,10 +18,6 @@ pub enum CurrentScreen {
     Tab3,
 }
 
-pub enum TextData {
-    Value
-}
-
 /// The main application which holds the state and logic of the application.
 // #[derive(Debug, Default)]
 pub struct App {
@@ -28,6 +26,7 @@ pub struct App {
     pub current_screen: CurrentScreen,
     pub input_value: String,
     pub can_edit: bool,
+    pub tab_data: HashMap<usize, String>,
 }
 
 impl App {
@@ -38,12 +37,23 @@ impl App {
             current_screen: CurrentScreen::Main,
             input_value: String::new(),
             can_edit: true,
+            tab_data: HashMap::new(),
         }
     }
 
     /// Run the application's main loop.
     pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         self.running = true;
+
+        // initialize hashmap data
+        CurrentScreen::iter().for_each(|tab_index| {
+            self.tab_data.insert(
+                tab_index as usize,
+                String::from("init")
+            );
+        });
+
+
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
             self.handle_crossterm_events()?;
