@@ -6,6 +6,8 @@ use strum_macros::{Display, EnumIter, FromRepr};
 #[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum CurrentScreen {
     #[default]
+    #[strum(to_string = "Main")]
+    Main,
     #[strum(to_string = "Tab 1")]
     Tab1,
     #[strum(to_string = "Tab 2")]
@@ -23,7 +25,6 @@ pub enum TextData {
 pub struct App {
     /// Is the application running?
     running: bool,
-    pub counter: u8,
     pub current_screen: CurrentScreen,
     pub input_value: String,
     pub can_edit: bool,
@@ -34,8 +35,7 @@ impl App {
     pub fn new() -> Self {
         Self {
             running: true,
-            counter: 0,
-            current_screen: CurrentScreen::Tab1,
+            current_screen: CurrentScreen::Main,
             input_value: String::from("initial value"),
             can_edit: true,
         }
@@ -73,12 +73,9 @@ impl App {
             (_, KeyCode::Esc | KeyCode::Char('q'))
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             
-            (_, KeyCode::Right) => self.next_tab(),
-            (_, KeyCode::Left) => self.previous_tab(),
-            
-            // Increment counter
-            // (_, KeyCode::Right) => self.increment_counter(),
-            
+            (_, KeyCode::Right | KeyCode::Char('[')) => self.next_tab(),
+            (_, KeyCode::Left | KeyCode::Char(']')) => self.previous_tab(),
+                        
             // TODO: implement better way to enter edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
@@ -102,10 +99,6 @@ impl App {
         self.running = false;
     }
 
-    fn increment_counter(&mut self) {
-        self.counter += 1;
-    }
-
     // TODO: install strum
     pub fn next_tab(&mut self) {
         self.current_screen = self.current_screen.next();
@@ -113,6 +106,10 @@ impl App {
 
     pub fn previous_tab(&mut self) {
         self.current_screen = self.current_screen.previous();
+    }
+
+    pub fn get_input_value(&self) -> &str {
+        &self.input_value
     }
 }
 

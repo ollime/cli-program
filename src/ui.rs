@@ -20,22 +20,10 @@ impl Widget for &App {
     /// - <https://github.com/ratatui/ratatui/tree/main/ratatui-widgets/examples>
     fn render(self, area: Rect, buf: &mut Buffer) {
         let title = Line::from("TUI program title")
-        .bold()
-        .blue()
-        .centered();
-
-        let hello_text = "Hello, Ratatui!\n\n\
-            Created using https://github.com/ratatui/templates\n\
-            Press `Esc`, `Ctrl-C` or `q` to stop running.";
-
-        let content = Text::from(
-            vec![
-                Line::from(hello_text).yellow(),
-                Line::from(self.counter.to_string()).blue(),
-                Line::from("this is a test"),
-            ]
-        );
-
+            .bold()
+            .blue()
+            .centered();
+        
         // Renders double nested blocks
         let outer_block = Block::bordered()
             .border_set(border::ROUNDED)
@@ -49,9 +37,6 @@ impl Widget for &App {
         let inner_area = outer_block.inner(area); // gets area inside of outer_block
         
         // Renders text inside of inner_block
-        // let paragraph = Paragraph::new(Text::from(self.input_value.as_str()))
-        //     .wrap(Wrap {trim: true})
-        //     .centered();
         let paragraph_area = inner_block.inner(inner_area);
 
         outer_block.render(area, buf);
@@ -65,8 +50,12 @@ impl Widget for &App {
 
 impl Widget for CurrentScreen {
     fn render(self, area: Rect, buf: &mut Buffer) {
+                // let paragraph = Paragraph::new(Text::from(self.input_value.as_str()))
+        //     .wrap(Wrap {trim: true})
+        //     .centered();
         match self {
-            Self::Tab1 => self.render_tab(area, buf, String::from("first page")),
+            Self::Main => self.render_main_tab(area, buf),
+            Self::Tab1 => self.render_tab(area, buf, String::from("tab1")),
             Self::Tab2 => self.render_tab(area, buf, String::from("test")),
             Self::Tab3 => self.render_tab(area, buf, String::from("!!!")),
         }
@@ -77,6 +66,24 @@ impl CurrentScreen {
     fn title(self) -> Line<'static> {
         format!(" {self} ")
             .into()
+    }
+
+    fn render_main_tab(self, area: Rect, buf: &mut Buffer) {
+        let hello_text = "Hello, Ratatui!\n\n\
+            Created using https://github.com/ratatui/templates\n\
+            Press `Esc`, `Ctrl-C` or `q` to stop running.";
+
+        let content = Text::from(
+            vec![
+                Line::from(hello_text).yellow(),
+                Line::from("this is a test"),
+            ]
+        );
+
+        Paragraph::new(content)
+            .wrap(Wrap {trim: true})
+            .centered()
+            .render(area, buf);
     }
 
     // content for each tab
