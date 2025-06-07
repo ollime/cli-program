@@ -54,10 +54,11 @@ impl Widget for &App {
         //     .centered();
         let paragraph_area = inner_block.inner(inner_area);
 
+        outer_block.render(area, buf);
         inner_block.render(inner_area, buf); // renders inner_block in outer_block
         // paragraph.render(paragraph_area, buf); // renders paragraph in inner_block
 
-        self.render_tabs(area, buf);
+        self.render_tabs(inner_area, buf);
         self.current_screen.render(paragraph_area, buf);
     }
 }
@@ -81,7 +82,6 @@ impl CurrentScreen {
     // content for each tab
     fn render_tab(self, area: Rect, buf: &mut Buffer, text: String) {
         Paragraph::new(text)
-            .block(Block::new())
             .render(area, buf);
     }
 }
