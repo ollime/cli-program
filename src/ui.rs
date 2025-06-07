@@ -6,8 +6,10 @@ use ratatui::{
     buffer::Buffer,
     layout::Rect,
 };
+use strum::IntoEnumIterator;
 
 use crate::app::App;
+use crate::app::CurrentScreen;
 
 impl Widget for &App {
     /// Renders the user interface.
@@ -56,10 +58,23 @@ impl Widget for &App {
         inner_block.render(inner_area, buf); // renders inner_block in outer_block
         paragraph.render(paragraph_area, buf); // renders paragraph in inner_block
 
-        // let tab_titles = SelectedTab::iter().map(SelectedTab::title);
-        let tabs = Tabs::new(vec!["tab1".red(), "tab2".blue(), "tab3".yellow()])
-            .block(outer_block)
-            .select(2)
+        self.render_tabs(area, buf);
+    }
+}
+
+impl CurrentScreen {
+    fn title(self) -> Line<'static> {
+        format!(" {self} ")
+            .into()
+}
+}
+
+impl App {
+    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
+        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
+        let current_screen_index = self.current_screen as usize;
+        let tabs = Tabs::new(tab_titles)
+            .select(current_screen_index) // sets tab index
             .divider(symbols::DOT)
             .padding("->", "<-");
 
