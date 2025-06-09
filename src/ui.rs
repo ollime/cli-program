@@ -197,9 +197,10 @@ impl CurrentScreen {
     
     fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
         let current_tab_index = app.current_screen as usize;
-        let data = app.tab_data.get(&current_tab_index).expect("No data found for tab 0");
+        let text = app.tab_data.get(&current_tab_index).expect("No text found for tab 0");
+        let cursor_pos = app.cursor_pos;
 
-        TextInput::new(data)
+        TextInput::new(text, cursor_pos)
             .render(area, buf);
     }
 }

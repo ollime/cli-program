@@ -3,17 +3,19 @@ use ratatui::{
     widgets::{Widget, Paragraph, Wrap},
     buffer::Buffer,
     layout::Rect,
-    style::{Style, Modifier, Color},
+    // style::{Style, Modifier, Color},
 };
 
 pub struct TextInput<'a> {
-    pub input_value: &'a String,
+    input_value: &'a String,
+    cursor_pos: usize
 }
 
 impl<'a> TextInput<'a> {
-    pub fn new(input_value: &'a String) -> Self {
+    pub fn new(input_value: &'a String, cursor_pos: usize) -> Self {
         TextInput {
-            input_value
+            input_value,
+            cursor_pos
         }
     }
 }

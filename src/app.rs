@@ -26,6 +26,7 @@ pub struct App {
     pub current_screen: CurrentScreen,
     pub can_edit: bool,
     pub tab_data: HashMap<usize, String>,
+    pub cursor_pos: usize,
 }
 
 impl App {
@@ -36,6 +37,7 @@ impl App {
             current_screen: CurrentScreen::Main,
             can_edit: true,
             tab_data: HashMap::new(),
+            cursor_pos: 0,
         }
     }
 
@@ -88,11 +90,17 @@ impl App {
                 if !self.can_edit {
                     self.previous_tab()
                 }
+                // else if self.cursor_pos > 1 {
+                //     self.move_cursor(self.cursor_pos - 1)
+                // }
             }
             (_, KeyCode::Right) => {
                 if !self.can_edit {
                     self.next_tab()
                 }
+                // else {
+                //     self.move_cursor(self.cursor_pos + 1)
+                // }
             }
 
             // TODO: implement better way to enter edit mode
@@ -158,10 +166,21 @@ impl App {
 
     pub fn next_tab(&mut self) {
         self.current_screen = self.current_screen.next();
+        self.cursor_pos = 0; // reset cursor position
     }
 
     pub fn previous_tab(&mut self) {
         self.current_screen = self.current_screen.previous();
+        self.cursor_pos = 0; // reset cursor position
+    }
+
+    fn move_cursor(&mut self, new_index: usize) {
+        let current_tab_index = self.current_screen as usize;
+        if let Some(current_tab_data) = self.tab_data.get(&current_tab_index) {
+            let mut new_content = current_tab_data.replace("\\|", "");
+            // new_content.insert_str(new_index, "\\|");
+            self.tab_data.insert(current_tab_index, new_content);
+        }
     }
 }
 
