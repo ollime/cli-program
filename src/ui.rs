@@ -161,20 +161,21 @@ impl CurrentScreen {
         let main_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Max(2),
+                Constraint::Max(3),
                 Constraint::Fill(1)
             ])
             .split(area);
 
         // render text
-        let text = "Commands";
+        let text = "Commands\n* edit mode: off command only\n";
         Paragraph::new(text)
             .render(main_layout[0], buf);
 
         // list rendering
         let list_items: BTreeMap<&str, &str> = BTreeMap::from([
             ("[ ]", "Switch tab"),
-            ("Left/Right", "Switch tab (edit mode: off)"),
+            ("* Left/Right", "Switch tab"),
+            ("* Up/Down", "Switch sidebar options"),
             ("Ctrl + E", "Change edit mode"),
         ]);
 
@@ -183,7 +184,10 @@ impl CurrentScreen {
             .map(|item| ListItem::new(
                 Line::from(
                     vec![
-                        item.0.yellow().bold(), // using Stylize syntax
+                        match item.0.contains("*") {
+                            true => item.0.magenta().bold(),
+                            false => item.0.yellow().bold(), // using Stylize syntax
+                        },
                         " ".into(),
                         item.1.into()
                     ]
