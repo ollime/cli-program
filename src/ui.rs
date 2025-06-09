@@ -40,12 +40,11 @@ impl Widget for &App {
                 ])
                 .split(title_layout[1]);
 
-        // self.render_main_layout(title_layout[0], buf);
-        // self.render_side_bar(title_layout[1], buf);
-        
-        Block::bordered()
-            .render(content_layout[0], buf);
-        
+        // render left_block contents
+        let left_block = Block::bordered();
+        let left_block_area = left_block.inner(content_layout[0]); // grab the area inside the block
+        left_block.render(content_layout[0], buf); // render block ui
+        self.render_side_bar(left_block_area, buf);
         
         let right_block = Block::bordered(); // block ui
         let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
@@ -120,29 +119,35 @@ impl App {
     }
 
     fn render_side_bar(&self, area: Rect, buf: &mut Buffer) {
-        // block rendering
-        let block = Block::new()
-            .padding(Padding::vertical(2));
-        let inner_area = block.inner(area); // get area inside of the block
-        block.render(area, buf); // render the block
+        let side_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                    Constraint::Max(2),
+                    Constraint::Fill(1),
+                ]
+            )
+            .split(area);
 
+        let tab_title = self.current_screen.to_string();
+        Line::from(tab_title)
+            .yellow()
+            .render(side_layout[0], buf);
+        
         // list rendering
         let list_items = vec![
             "info",
-            "export",
             "notes",
+            "export",
         ];
         let list_items: Vec<ListItem> = list_items
             .into_iter()
             .map(|item| ListItem::new(
-                Line::from(
-                    item.yellow() // using Stylize syntax
-            )
+                Line::from(item)
             ))
             .collect();
 
         // render list inside the block
-        Widget::render(&List::new(list_items), inner_area, buf);
+        Widget::render(&List::new(list_items), side_layout[1], buf);
     }
 }
 
