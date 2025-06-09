@@ -8,6 +8,7 @@ use ratatui::{
 };
 use strum::IntoEnumIterator;
 use ratatui::prelude::*;
+use std::collections::BTreeMap;
 
 use crate::app::App;
 use crate::app::CurrentScreen;
@@ -152,21 +153,46 @@ impl CurrentScreen {
     }
 
     fn render_main_tab(self, area: Rect, buf: &mut Buffer) {
-        let hello_text = "Hello, Ratatui!\n\n\
-            Created using https://github.com/ratatui/templates\n\
-            Press `Esc`, `Ctrl-C` or `q` to stop running.";
+        let main_layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Max(2),
+                Constraint::Fill(1)
+            ])
+            .split(area);
 
-        let content = Text::from(
-            vec![
-                Line::from(hello_text).yellow(),
-                Line::from("this is a test"),
-            ]
-        );
+        // render text
+        let text = "Commands";
+        Paragraph::new(text)
+            .render(main_layout[0], buf);
 
-        Paragraph::new(content)
-            .wrap(Wrap {trim: true})
-            .centered()
-            .render(area, buf);
+        // list rendering
+        let list_items: BTreeMap<&str, &str> = BTreeMap::from([
+            ("[ ]", "Switch tab"),
+            ("Left/Right", "Switch tab (edit mode: off)"),
+            ("Ctrl + E", "Change edit mode"),
+        ]);
+
+        let list_items: Vec<ListItem> = list_items
+            .into_iter()
+            .map(|item| ListItem::new(
+                Line::from(
+                    vec![
+                        item.0.yellow().bold(), // using Stylize syntax
+                        " ".into(),
+                        item.1.into()
+                    ]
+                )
+            ))
+            .collect();
+
+        // render list inside the block
+        Widget::render(&List::new(list_items), main_layout[1], buf);
+
+        // Paragraph::new(content)
+        //     .wrap(Wrap {trim: true})
+        //     .centered()
+        //     .render(area, buf);
     }
     
     fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
