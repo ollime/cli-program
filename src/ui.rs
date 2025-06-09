@@ -104,7 +104,7 @@ impl App {
                     false => Color::Red,
                 }),
                 "  -  ".white(),
-                Span::from("line: 2"),
+                Span::from(format!("line: {}", self.get_line_length())),
                 "  -  ".white(),
                 Span::from(format!("character count: {}", self.get_character_count()))
             ]
@@ -116,6 +116,13 @@ impl App {
         let current_tab_index = self.current_screen as usize;
         let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
         data.len()
+    }
+
+    pub fn get_line_length(&self) -> usize {
+        let current_tab_index = self.current_screen as usize;
+        let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
+        let data = data.split('\n');
+        data.count()
     }
 
     fn render_side_bar(&self, area: Rect, buf: &mut Buffer) {

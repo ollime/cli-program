@@ -213,7 +213,7 @@ impl App {
         let current_tab_index = self.current_screen as usize;
         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
         let str_slice = &current_tab_data[..self.cursor_pos];
-
+        
         if let Some(newline_index) = str_slice.rfind('\n') {
             let line_diff = &str_slice[newline_index..].len(); // difference between cursor_pos and \n
             self.cursor_pos = self.cursor_pos - line_diff;
