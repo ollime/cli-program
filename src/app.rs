@@ -49,7 +49,7 @@ impl App {
         CurrentScreen::iter().for_each(|tab_index| {
             self.tab_data.insert(
                 tab_index as usize,
-                String::from("init")
+                String::new()
             );
         });
 
@@ -106,13 +106,17 @@ impl App {
             (_, KeyCode::Char(value)) => {
                 if self.can_edit {
                     let current_tab_index = self.current_screen as usize;
-                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                    let new_content = current_tab_data.clone() + &value.to_string();
                     
-                    self.tab_data.insert(
-                        current_tab_index,
-                        new_content
-                    );
+                    // cannot be first index (main tab)
+                    if current_tab_index > 0 {
+                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let new_content = current_tab_data.clone() + &value.to_string();
+                        
+                        self.tab_data.insert(
+                            current_tab_index,
+                            new_content
+                        );
+                    }
                 }
             },
             (_, KeyCode::Backspace) => {

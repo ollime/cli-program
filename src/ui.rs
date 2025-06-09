@@ -3,7 +3,6 @@ use ratatui::{
     text::{Line, Text, Span},
     widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs,
         List, ListItem, ListState, Borders},
-    symbols:: border, symbols,
     buffer::Buffer,
     layout::Rect,
 };
@@ -107,59 +106,16 @@ impl App {
                 "  -  ".white(),
                 Span::from("line: 2"),
                 "  -  ".white(),
-                Span::from("word count: 32")
+                Span::from(format!("character count: {}", self.get_character_count()))
             ]
         );
         text_display.render(title_block_area, buf);
     }
 
-    fn render_main_layout(&self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from("TUI program title")
-            .bold()
-            .blue()
-            .centered();
-
-        // Renders double nested blocks
-        let outer_block = Block::bordered()
-            .border_set(border::ROUNDED)
-            .padding(Padding::horizontal(1))
-            .title(title)
-            .title(
-                Line::from(
-                    vec![
-                        Span::from("edit mode: "),
-                        Span::from(format!("{}", match self.can_edit {
-                            true => "on",
-                            false => "off"
-                        })).style(match self.can_edit {
-                            true => Color::Green,
-                            false => Color::Red,
-                        })
-                    ]
-                ).right_aligned()
-            );
-
-        let inner_block = Block::bordered()
-            .border_set(border::ROUNDED)
-            .padding(Padding::new(2, 2, 1, 1));
-        
-        // By defining inner_area inside of outer_block, the rendered inner_block
-        // will be inside of outer_block.
-        let inner_area = outer_block.inner(area); // gets area inside of outer_block
-        
-        // Renders text inside of inner_block
-        let paragraph_area = inner_block.inner(inner_area);
-
-        outer_block.render(area, buf);
-        inner_block.render(inner_area, buf); // renders inner_block in outer_block
-
-        self.render_tabs(inner_area, buf);
-        match self.current_screen {
-            CurrentScreen::Main => self.current_screen.render_main_tab(paragraph_area, buf),
-            CurrentScreen::Tab1 => self.current_screen.render_tab(self, paragraph_area, buf),
-            CurrentScreen::Tab2 => self.current_screen.render_tab(self, paragraph_area, buf),
-            CurrentScreen::Tab3 => self.current_screen.render_tab(self, paragraph_area, buf),
-        }
+    fn get_character_count(&self) -> usize {
+        let current_tab_index = self.current_screen as usize;
+        let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
+        data.len()
     }
 
     fn render_side_bar(&self, area: Rect, buf: &mut Buffer) {
