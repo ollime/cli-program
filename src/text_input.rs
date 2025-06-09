@@ -20,20 +20,20 @@ impl<'a> TextInput<'a> {
 
 impl<'a> Widget for TextInput<'a> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let content = Line::from(
-            vec![
-                Span::from(self.input_value.as_str()),
-                // adds blinking cursor to screen
-                Span::from(String::from("|"))
-                    .style(
-                        Style::default()
-                            .fg(Color::Yellow)
-                            .add_modifier(Modifier::RAPID_BLINK)
-                        ),
-            ]
-        );
+        let raw_text = self.input_value.as_str();
+
+        // handle multiple lines
+        let lines: Vec<_> = raw_text
+            .split('\n')
+            .collect();
+
+        // convert strings to Line widget
+        let lines: Vec<Line<'_>> = lines.iter().map(
+            |line| Line::from(*line)
+        ).collect();
         
-        Paragraph::new(content)
+        // display as multiline paragraph
+        Paragraph::new(lines)
             .wrap(Wrap {trim: true})
             .render(area, buf);
         }

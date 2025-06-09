@@ -119,6 +119,18 @@ impl App {
                     }
                 }
             },
+            (_, KeyCode::Enter) => {
+                if self.can_edit {
+                    let current_tab_index = self.current_screen as usize;
+                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                    let new_content = current_tab_data.clone() + "\n";
+
+                    self.tab_data.insert(
+                        current_tab_index,
+                        new_content
+                    );
+                }
+            },
             (_, KeyCode::Backspace) => {
                 if self.can_edit {
                     let current_tab_index = self.current_screen as usize;
