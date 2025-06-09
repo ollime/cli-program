@@ -24,7 +24,6 @@ pub struct App {
     /// Is the application running?
     running: bool,
     pub current_screen: CurrentScreen,
-    pub input_value: String,
     pub can_edit: bool,
     pub tab_data: HashMap<usize, String>,
 }
@@ -35,7 +34,6 @@ impl App {
         Self {
             running: true,
             current_screen: CurrentScreen::Main,
-            input_value: String::new(),
             can_edit: true,
             tab_data: HashMap::new(),
         }

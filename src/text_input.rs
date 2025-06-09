@@ -27,6 +27,15 @@ impl<'a> Widget for TextInput<'a> {
             .split('\n')
             .collect();
 
+
+            // blinking cursor
+            // Span::from(String::from("|"))
+            //         .style(
+            //             Style::default()
+            //                 .fg(Color::Yellow)
+            //                 .add_modifier(Modifier::RAPID_BLINK)
+            //             )
+
         // convert strings to Line widget
         let lines: Vec<Line<'_>> = lines.iter().map(
             |line| Line::from(*line)

@@ -193,11 +193,6 @@ impl CurrentScreen {
 
         // render list inside the block
         Widget::render(&List::new(list_items), main_layout[1], buf);
-
-        // Paragraph::new(content)
-        //     .wrap(Wrap {trim: true})
-        //     .centered()
-        //     .render(area, buf);
     }
     
     fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
