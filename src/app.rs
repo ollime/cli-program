@@ -49,7 +49,7 @@ impl App {
         CurrentScreen::iter().for_each(|tab_index| {
             self.tab_data.insert(
                 tab_index as usize,
-                String::new()
+                String::from("\\|")
             );
         });
 
@@ -90,17 +90,18 @@ impl App {
                 if !self.can_edit {
                     self.previous_tab()
                 }
-                // else if self.cursor_pos > 1 {
-                //     self.move_cursor(self.cursor_pos - 1)
-                // }
+                else if self.cursor_pos > 0 { // must be 1 or greater to prevent sign error
+                    self.cursor_pos = self.cursor_pos - 1;
+                }
             }
             (_, KeyCode::Right) => {
+                let size = self.get_character_count();
                 if !self.can_edit {
                     self.next_tab()
                 }
-                // else {
-                //     self.move_cursor(self.cursor_pos + 1)
-                // }
+                else if self.cursor_pos < size { // cannot exceed the current text size
+                    self.cursor_pos = self.cursor_pos + 1;
+                }
             }
 
             // TODO: implement better way to enter edit mode
@@ -119,7 +120,7 @@ impl App {
                         let new_content = current_tab_data.clone() + &value.to_string();
                         
                         self.tab_data.insert(
-                            current_tab_index,
+                            self.cursor_pos + 1,
                             new_content
                         );
                     }
@@ -142,7 +143,7 @@ impl App {
                     let current_tab_index = self.current_screen as usize;
                     let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
 
-                    if current_tab_data.len() > 0 {
+                    if current_tab_data.len() > 0 { // cannot delete if there is no text
                         let new_content = current_tab_data
                             .strip_suffix(|_: char| true)
                             .unwrap()
@@ -172,15 +173,6 @@ impl App {
     pub fn previous_tab(&mut self) {
         self.current_screen = self.current_screen.previous();
         self.cursor_pos = 0; // reset cursor position
-    }
-
-    fn move_cursor(&mut self, new_index: usize) {
-        let current_tab_index = self.current_screen as usize;
-        if let Some(current_tab_data) = self.tab_data.get(&current_tab_index) {
-            let mut new_content = current_tab_data.replace("\\|", "");
-            // new_content.insert_str(new_index, "\\|");
-            self.tab_data.insert(current_tab_index, new_content);
-        }
     }
 }
 

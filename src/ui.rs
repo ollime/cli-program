@@ -112,7 +112,7 @@ impl App {
         text_display.render(title_block_area, buf);
     }
 
-    fn get_character_count(&self) -> usize {
+    pub fn get_character_count(&self) -> usize {
         let current_tab_index = self.current_screen as usize;
         let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
         data.len()
