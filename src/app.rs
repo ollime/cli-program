@@ -27,6 +27,7 @@ pub struct App {
     pub can_edit: bool,
     pub tab_data: HashMap<usize, String>,
     pub cursor_pos: usize,
+    pub show_popup: bool,
 }
 
 impl App {
@@ -38,6 +39,7 @@ impl App {
             can_edit: true,
             tab_data: HashMap::new(),
             cursor_pos: 0,
+            show_popup: false,
         }
     }
 
@@ -103,16 +105,20 @@ impl App {
                 }
             }
             
-            (_, KeyCode:: Up) => {
+            // navigate text input
+            (_, KeyCode::Up) => {
                 if self.can_edit {
                     self.previous_line()
                 }
             }
-
-            (_, KeyCode:: Down) => {
+            (_, KeyCode::Down) => {
                 if self.can_edit {
                     self.next_line()
                 }
+            }
+
+            (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
+                self.show_popup = !self.show_popup
             }
 
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
@@ -213,7 +219,7 @@ impl App {
         let current_tab_index = self.current_screen as usize;
         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
         let str_slice = &current_tab_data[..self.cursor_pos];
-        
+
         if let Some(newline_index) = str_slice.rfind('\n') {
             let line_diff = &str_slice[newline_index..].len(); // difference between cursor_pos and \n
             self.cursor_pos = self.cursor_pos - line_diff;
