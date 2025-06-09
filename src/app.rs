@@ -102,6 +102,12 @@ impl App {
                     self.cursor_pos = self.cursor_pos + 1;
                 }
             }
+            
+            (_, KeyCode:: Up) => {
+                if self.can_edit {
+                    self.previous_line()
+                }
+            }
 
             (_, KeyCode:: Down) => {
                 if self.can_edit {
@@ -195,6 +201,22 @@ impl App {
         if let Some(newline_index) = str_slice.find('\n') {
             let line_diff = &str_slice[..newline_index].len(); // difference between cursor_pos and \n
             self.cursor_pos = self.cursor_pos + line_diff + 1;
+        }
+    }
+    
+    fn previous_line(&mut self) {
+        // get characters after current cursor_pos (max should be max # of cols?)
+        // then find next \n character
+        // then find num of characters between cursor_pos and \n
+        // add that num to cursor_pos
+
+        let current_tab_index = self.current_screen as usize;
+        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+        let str_slice = &current_tab_data[..self.cursor_pos];
+
+        if let Some(newline_index) = str_slice.rfind('\n') {
+            let line_diff = &str_slice[newline_index..].len(); // difference between cursor_pos and \n
+            self.cursor_pos = self.cursor_pos - line_diff;
         }
     }
 }
