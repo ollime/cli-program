@@ -1,12 +1,14 @@
 use ratatui::{
     style::{Stylize, Color},
     text::{Line, Text, Span},
-    widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs},
+    widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs,
+        List, ListItem, ListState, Borders},
     symbols:: border, symbols,
     buffer::Buffer,
     layout::Rect,
 };
 use strum::IntoEnumIterator;
+use ratatui::prelude::*;
 
 use crate::app::App;
 use crate::app::CurrentScreen;
@@ -20,11 +22,60 @@ impl Widget for &App {
     /// - <https://docs.rs/ratatui/latest/ratatui/widgets/index.html>
     /// - <https://github.com/ratatui/ratatui/tree/main/ratatui-widgets/examples>
     fn render(self, area: Rect, buf: &mut Buffer) {
+        let outer_layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Min(30),
+                Constraint::Length(10),
+            ])
+            .split(area);
+
         let title = Line::from("TUI program title")
             .bold()
             .blue()
             .centered();
+        let title_block = Block::bordered()
+            .title(title)
+            .borders(Borders::TOP)
+            .padding(Padding::horizontal(1));
+        let title_block_area = title_block.inner(outer_layout[0]);
+        title_block.render(outer_layout[0], buf);
+
+        let inner_layout = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints(vec![
+                    Constraint::Percentage(25),
+                    Constraint::Percentage(75)
+                ])
+                .split(title_block_area);
+
+        // self.render_main_layout(outer_layout[0], buf);
+        self.render_side_bar(outer_layout[1], buf);
         
+        Block::bordered()
+            .render(inner_layout[0], buf);
+        Block::bordered()
+            .render(inner_layout[1], buf);
+    }
+}
+
+impl App {
+    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
+        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
+        let current_screen_index = self.current_screen as usize;
+        Tabs::new(tab_titles)
+            .select(current_screen_index) // sets tab index
+            .divider(symbols::DOT)
+            .padding("->", "<-")
+            .render(area, buf);
+    }
+
+    fn render_main_layout(&self, area: Rect, buf: &mut Buffer) {
+        let title = Line::from("TUI program title")
+            .bold()
+            .blue()
+            .centered();
+
         // Renders double nested blocks
         let outer_block = Block::bordered()
             .border_set(border::ROUNDED)
@@ -58,7 +109,6 @@ impl Widget for &App {
 
         outer_block.render(area, buf);
         inner_block.render(inner_area, buf); // renders inner_block in outer_block
-        // paragraph.render(paragraph_area, buf); // renders paragraph in inner_block
 
         self.render_tabs(inner_area, buf);
         match self.current_screen {
@@ -68,17 +118,31 @@ impl Widget for &App {
             CurrentScreen::Tab3 => self.current_screen.render_tab(self, paragraph_area, buf),
         }
     }
-}
 
-impl App {
-    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
-        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
-        let current_screen_index = self.current_screen as usize;
-        Tabs::new(tab_titles)
-            .select(current_screen_index) // sets tab index
-            .divider(symbols::DOT)
-            .padding("->", "<-")
-            .render(area, buf);
+    fn render_side_bar(&self, area: Rect, buf: &mut Buffer) {
+        // block rendering
+        let block = Block::new()
+            .padding(Padding::vertical(2));
+        let inner_area = block.inner(area); // get area inside of the block
+        block.render(area, buf); // render the block
+
+        // list rendering
+        let list_items = vec![
+            "menu",
+            "export",
+            "test"
+        ];
+        let list_items: Vec<ListItem> = list_items
+            .into_iter()
+            .map(|item| ListItem::new(
+                Line::from(
+                    item.yellow() // using Stylize syntax
+            )
+            ))
+            .collect();
+
+        // render list inside the block
+        Widget::render(&List::new(list_items), inner_area, buf);
     }
 }
 
