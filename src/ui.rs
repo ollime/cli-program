@@ -23,23 +23,14 @@ impl Widget for &App {
     /// - <https://github.com/ratatui/ratatui/tree/main/ratatui-widgets/examples>
     fn render(self, area: Rect, buf: &mut Buffer) {
         let outer_layout = Layout::default()
-            .direction(Direction::Horizontal)
+            .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Min(30),
-                Constraint::Length(10),
+                Constraint::Max(2), // top 2 lines for title block
+                Constraint::Fill(1),
             ])
             .split(area);
 
-        let title = Line::from("TUI program title")
-            .bold()
-            .blue()
-            .centered();
-        let title_block = Block::bordered()
-            .title(title)
-            .borders(Borders::TOP)
-            .padding(Padding::horizontal(1));
-        let title_block_area = title_block.inner(outer_layout[0]);
-        title_block.render(outer_layout[0], buf);
+        self.render_title(outer_layout[0], buf);
 
         let inner_layout = Layout::default()
                 .direction(Direction::Horizontal)
@@ -47,10 +38,10 @@ impl Widget for &App {
                     Constraint::Percentage(25),
                     Constraint::Percentage(75)
                 ])
-                .split(title_block_area);
+                .split(outer_layout[1]);
 
         // self.render_main_layout(outer_layout[0], buf);
-        self.render_side_bar(outer_layout[1], buf);
+        // self.render_side_bar(outer_layout[1], buf);
         
         Block::bordered()
             .render(inner_layout[0], buf);
@@ -68,6 +59,37 @@ impl App {
             .divider(symbols::DOT)
             .padding("->", "<-")
             .render(area, buf);
+    }
+
+    fn render_title(&self, area: Rect, buf: &mut Buffer) {
+        let title = Line::from("TUI program title")
+            .bold()
+            .blue()
+            .centered();
+        let title_block = Block::bordered()
+            .title(title)
+            .borders(Borders::TOP)
+            .padding(Padding::horizontal(1));
+        let title_block_area = title_block.inner(area);
+        title_block.render(area, buf);
+
+        let text_display = Line::from(
+            vec![
+                Span::from("edit mode: "),
+                Span::from(format!("{}", match self.can_edit {
+                    true => "on",
+                    false => "off"
+                })).style(match self.can_edit {
+                    true => Color::Green,
+                    false => Color::Red,
+                }),
+                "  -  ".white(),
+                Span::from("line: 2"),
+                "  -  ".white(),
+                Span::from("word count: 32")
+            ]
+        );
+        text_display.render(title_block_area, buf);
     }
 
     fn render_main_layout(&self, area: Rect, buf: &mut Buffer) {
@@ -128,9 +150,9 @@ impl App {
 
         // list rendering
         let list_items = vec![
-            "menu",
+            "info",
             "export",
-            "test"
+            "notes",
         ];
         let list_items: Vec<ListItem> = list_items
             .into_iter()
