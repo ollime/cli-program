@@ -49,7 +49,7 @@ impl App {
         CurrentScreen::iter().for_each(|tab_index| {
             self.tab_data.insert(
                 tab_index as usize,
-                String::from("\\|")
+                String::from("")
             );
         });
 
@@ -113,16 +113,19 @@ impl App {
             (_, KeyCode::Char(value)) => {
                 if self.can_edit {
                     let current_tab_index = self.current_screen as usize;
-                    
                     // cannot be first index (main tab)
                     if current_tab_index > 0 {
                         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                        let new_content = current_tab_data.clone() + &value.to_string();
-                        
-                        self.tab_data.insert(
-                            self.cursor_pos + 1,
-                            new_content
-                        );
+                        let mut new_content = current_tab_data.clone();
+
+                        // returns cursor_pos or new length depending on which one is smaller
+                        // if cursor_pos is smaller, places at location in text
+                        // if length is smaller, then places cursor at end of text
+                        let cursor = self.cursor_pos.min(new_content.len());
+
+                        new_content.insert(cursor, value);
+                        self.tab_data.insert(current_tab_index, new_content);
+                        self.cursor_pos = cursor + 1;
                     }
                 }
             },
@@ -130,12 +133,12 @@ impl App {
                 if self.can_edit {
                     let current_tab_index = self.current_screen as usize;
                     let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                    let new_content = current_tab_data.clone() + "\n";
-
-                    self.tab_data.insert(
-                        current_tab_index,
-                        new_content
-                    );
+                    let mut new_content = current_tab_data.clone();
+                    
+                    let cursor = self.cursor_pos.min(new_content.len());
+                    new_content.insert(cursor, '\n');
+                    self.tab_data.insert(current_tab_index, new_content);
+                    self.cursor_pos = cursor + 1;
                 }
             },
             (_, KeyCode::Backspace) => {
