@@ -1,8 +1,8 @@
 use ratatui::{
     style::{Stylize, Color},
-    text::{Line, Text, Span},
-    widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs,
-        List, ListItem, ListState, Borders},
+    text::{Line, Span},
+    widgets::{Widget, Block, Paragraph, Padding, Tabs,
+        List, ListItem, Borders},
     buffer::Buffer,
     layout::Rect,
 };

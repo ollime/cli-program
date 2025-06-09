@@ -85,7 +85,6 @@ impl App {
             (_, KeyCode::Char('[')) => self.previous_tab(),
             (_, KeyCode::Char(']')) => self.next_tab(),
             
-            // TODO: move cursor back/forwards
             (_, KeyCode::Left) => {
                 if !self.can_edit {
                     self.previous_tab()
@@ -104,7 +103,6 @@ impl App {
                 }
             }
 
-            // TODO: implement better way to enter edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
             },
