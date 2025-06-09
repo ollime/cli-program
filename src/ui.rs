@@ -1,6 +1,6 @@
 use ratatui::{
-    style::Stylize,
-    text::{Line, Text},
+    style::{Stylize, Color},
+    text::{Line, Text, Span},
     widgets::{Widget, Block, Paragraph, Padding, Wrap, Tabs},
     symbols:: border, symbols,
     buffer::Buffer,
@@ -30,11 +30,20 @@ impl Widget for &App {
             .border_set(border::ROUNDED)
             .padding(Padding::horizontal(1))
             .title(title)
-            // TODO: green on and red off
-            .title(Line::from(format!("edit mode: {}", match self.can_edit {
-                true => "on",
-                false => "off"
-            })).right_aligned());
+            .title(
+                Line::from(
+                    vec![
+                        Span::from("edit mode: "),
+                        Span::from(format!("{}", match self.can_edit {
+                            true => "on",
+                            false => "off"
+                        })).style(match self.can_edit {
+                            true => Color::Green,
+                            false => Color::Red,
+                        })
+                    ]
+                ).right_aligned()
+            );
 
         let inner_block = Block::bordered()
             .border_set(border::ROUNDED)
