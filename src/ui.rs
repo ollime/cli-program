@@ -22,7 +22,7 @@ impl Widget for &App {
     /// - <https://docs.rs/ratatui/latest/ratatui/widgets/index.html>
     /// - <https://github.com/ratatui/ratatui/tree/main/ratatui-widgets/examples>
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let outer_layout = Layout::default()
+        let title_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
                 Constraint::Max(2), // top 2 lines for title block
@@ -30,41 +30,62 @@ impl Widget for &App {
             ])
             .split(area);
 
-        self.render_title(outer_layout[0], buf);
+        self.render_title(title_layout[0], buf);
 
-        let inner_layout = Layout::default()
+        let content_layout = Layout::default()
                 .direction(Direction::Horizontal)
                 .constraints(vec![
                     Constraint::Percentage(25),
                     Constraint::Percentage(75)
                 ])
-                .split(outer_layout[1]);
+                .split(title_layout[1]);
 
-        // self.render_main_layout(outer_layout[0], buf);
-        // self.render_side_bar(outer_layout[1], buf);
+        // self.render_main_layout(title_layout[0], buf);
+        // self.render_side_bar(title_layout[1], buf);
         
         Block::bordered()
-            .render(inner_layout[0], buf);
-        Block::bordered()
-            .render(inner_layout[1], buf);
+            .render(content_layout[0], buf);
+        
+        
+        let right_block = Block::bordered(); // block ui
+        let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
+        right_block.render(content_layout[1], buf); // render block ui
+
+        // render right_block contents
+        let right_layout = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints(vec![
+                    Constraint::Max(2),
+                    Constraint::Fill(1)
+                ])
+                .split(right_block_area);
+        self.render_tabs(right_layout[0], buf); // render tab titles
+        match self.current_screen { // render tab content
+            CurrentScreen::Main => self.current_screen.render_main_tab(right_layout[1], buf),
+            CurrentScreen::Tab1 => self.current_screen.render_tab(self, right_layout[1], buf),
+            CurrentScreen::Tab2 => self.current_screen.render_tab(self, right_layout[1], buf),
+            CurrentScreen::Tab3 => self.current_screen.render_tab(self, right_layout[1], buf),
+        }
     }
 }
 
 impl App {
     fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
+        let tabs_block = Block::bordered()
+            .borders(Borders::BOTTOM);
         let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
         let current_screen_index = self.current_screen as usize;
         Tabs::new(tab_titles)
+            .block(tabs_block)
             .select(current_screen_index) // sets tab index
-            .divider(symbols::DOT)
-            .padding("->", "<-")
+            .divider(" ")
             .render(area, buf);
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
         let title = Line::from("TUI program title")
             .bold()
-            .blue()
+            .cyan()
             .centered();
         let title_block = Block::bordered()
             .title(title)
