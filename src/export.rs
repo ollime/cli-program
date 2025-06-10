@@ -8,7 +8,7 @@ use std::io::Write;
 use std::fs;
 
 pub struct Export {
-
+    
 }
 
 impl Export {
@@ -16,18 +16,16 @@ impl Export {
         let path: String = format!("data/{}.html", file_name);
         let path = Path::new(&path);
         let display = path.display();
-
+        
         // opens a file in write-only mode
         fs::create_dir_all("data")?; // check for directory
         let mut file = match File::create(&path) {
             Err(why) => panic!("couldn't create {}: {}", display, why),
             Ok(file) => file,
         };
-
-        // println!("{:?}", input_value.split("\n").collect::<Vec<_>>());
+        
         let html_text = Export::format_html(&file_name, input_value);
-        println!("{}", html_text);
-
+        
         // inserts input_value into the file
         match file.write_all(&html_text.as_bytes()) {
             Err(why) => panic!("couldn't write to {}: {}", display, why),
@@ -35,8 +33,9 @@ impl Export {
         }
         Ok(())
     }
-
+    
     fn format_html(file_name: &str, input_value: &str) -> String {
+        // TODO: handle formatting with regex
         let text_content: Vec<_> = input_value.split('\n')
             .map(|line| {
                 if line.len() > 0 {
@@ -50,31 +49,30 @@ impl Export {
         // creates a new line for html formatting purposes only
         let text_content = text_content.join("\n"); // no visual effect on page
 
-        let css_styles = "
-            html {
-                background-color: black;
-                color: white;
-                font: 1em 'arial';
+        let css_styles = 
+    "html {
+            background-color: black;
+            color: white;
+            font: 1em 'arial';
             }
-            html,
-            body {
-                display: flex;
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                width: 100%;
-            }
-            .container {
-                flex: 1;
-                border: 2px solid white;
-                padding: 20px;
-                box-sizing: border-box;
-                margin: 20px;
-            }
-            h1 {
-                font-size: 1.5em;
-            }
-        ";
+        html,
+        body {
+            display: flex;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+        .container {
+            flex: 1;
+            border: 2px solid white;
+            padding: 20px;
+            box-sizing: border-box;
+            margin: 20px;
+        }
+        h1 {
+            font-size: 1.5em;
+        }";
         
         // keep alignment/tabbing like this to ensure resulting HTML file is formatted correctly
         let html_text = format!(
