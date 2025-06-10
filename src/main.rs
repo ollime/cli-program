@@ -3,6 +3,7 @@ use crate::app::App;
 pub mod app;
 pub mod ui;
 pub mod text_input;
+pub mod export;
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;

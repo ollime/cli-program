@@ -68,9 +68,10 @@ impl Widget for &App {
 
         if self.show_popup {
             let block = Block::bordered().title("Export");
+            let paragraph = Paragraph::new("Export as HTML file? [Y/N]").block(block);
             let popup_area = App::popup_area(right_layout[1], 90, 90);
             Clear.render(popup_area, buf);
-            block.render(popup_area, buf);
+            paragraph.render(popup_area, buf);
         }
     }
 }
@@ -190,7 +191,7 @@ impl CurrentScreen {
             .split(area);
 
         // render text
-        let text = "Commands\n* edit mode: off command only\n";
+        let text = "Commands\n* if edit mode is off\n";
         Paragraph::new(text)
             .render(main_layout[0], buf);
 

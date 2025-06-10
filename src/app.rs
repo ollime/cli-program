@@ -5,6 +5,8 @@ use strum_macros::{Display, EnumIter, FromRepr};
 use strum::IntoEnumIterator;
 use std::collections::HashMap;
 
+use crate::export::Export;
+
 #[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum CurrentScreen {
     #[default]
@@ -119,6 +121,20 @@ impl App {
 
             (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
                 self.show_popup = !self.show_popup
+            }
+
+            (_, KeyCode::Char('y')) => {
+                if self.show_popup {
+                    let current_tab_index = self.current_screen as usize;
+                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                    
+                    let _ = Export::export_as_html(current_tab_data, self.current_screen.to_string());
+                }
+            }
+            (_, KeyCode::Char('n')) => {
+                if self.show_popup {
+                    self.show_popup = false;
+                }
             }
 
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
