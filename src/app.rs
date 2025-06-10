@@ -85,12 +85,13 @@ impl App {
             // Exits the program
             (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            (_, KeyCode::Char('q')) => if !self.can_edit { self.quit() } else {self.edit_text('q')}
+            (_, KeyCode::Char('q')) => if !self.can_edit { self.quit() } else {self.insert_char('q')}
 
-
+            // Switching current screen
             (_, KeyCode::Char('[')) => self.previous_tab(),
             (_, KeyCode::Char(']')) => self.next_tab(),
             
+            // Horizontal arrows can be used to either switch tab or move cursor (when in edit mode)
             (_, KeyCode::Left) => {
                 if !self.can_edit {
                     self.previous_tab()
@@ -109,7 +110,7 @@ impl App {
                 }
             }
             
-            // navigate text input
+            // Navigates text input
             (_, KeyCode::Up) => {
                 if self.can_edit {
                     self.previous_line()
@@ -121,12 +122,12 @@ impl App {
                 }
             }
 
+            // Export/save
             (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
                 self.show_popup = !self.show_popup
             }
-
             (_, KeyCode::Char('y')) => {
-                if self.show_popup {
+                if self.show_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
                         let current_tab_index = self.current_screen as usize;
                         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
@@ -135,7 +136,7 @@ impl App {
                     }
                 }
                 else {
-                    self.edit_text('y');
+                    self.insert_char('y');
                 }
             }
             (_, KeyCode::Char('n')) => {
@@ -143,46 +144,19 @@ impl App {
                     self.show_popup = false;
                 }
                 else {
-                    self.edit_text('n');
+                    self.insert_char('n');
                 }
             }
 
+            // Toggle edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
             },
 
-            // editing text input
-            (_, KeyCode::Char(value)) => self.edit_text(value),
-            (_, KeyCode::Enter) => {
-                if self.can_edit {
-                    let current_tab_index = self.current_screen as usize;
-                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                    let mut new_content = current_tab_data.clone();
-                    
-                    let cursor = self.cursor_pos.min(new_content.len());
-                    new_content.insert(cursor, '\n');
-                    self.tab_data.insert(current_tab_index, new_content);
-                    self.cursor_pos = cursor + 1;
-                }
-            },
-            (_, KeyCode::Backspace) => {
-                if self.can_edit {
-                    let current_tab_index = self.current_screen as usize;
-                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-
-                    if current_tab_data.len() > 0 { // cannot delete if there is no text
-                        let new_content = current_tab_data
-                            .strip_suffix(|_: char| true)
-                            .unwrap()
-                            .to_string();
-    
-                        self.tab_data.insert(
-                            current_tab_index,
-                            new_content
-                        );
-                    }
-                }
-            },
+            // Editing text input
+            (_, KeyCode::Char(value)) => self.insert_char(value),
+            (_, KeyCode::Enter) => self.insert_newline(),
+            (_, KeyCode::Backspace) => self.delete_char(),
             _ => {}
         }
     }
@@ -234,7 +208,7 @@ impl App {
         }
     }
 
-    fn edit_text(&mut self, value: char) {
+    fn insert_char(&mut self, value: char) {
         if self.can_edit {
             let current_tab_index = self.current_screen as usize;
             // cannot be first index (main tab)
@@ -251,6 +225,38 @@ impl App {
                 self.tab_data.insert(current_tab_index, new_content);
                 self.cursor_pos = cursor + 1;
             }
+        }
+    }
+
+    fn delete_char(&mut self) {
+        if self.can_edit {
+            let current_tab_index = self.current_screen as usize;
+            let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+
+            if current_tab_data.len() > 0 { // cannot delete if there is no text
+                let new_content = current_tab_data
+                    .strip_suffix(|_: char| true)
+                    .unwrap()
+                    .to_string();
+
+                self.tab_data.insert(
+                    current_tab_index,
+                    new_content
+                );
+            }
+        }
+    }
+
+    fn insert_newline(&mut self) {
+        if self.can_edit {
+            let current_tab_index = self.current_screen as usize;
+            let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+            let mut new_content = current_tab_data.clone();
+            
+            let cursor = self.cursor_pos.min(new_content.len());
+            new_content.insert(cursor, '\n');
+            self.tab_data.insert(current_tab_index, new_content);
+            self.cursor_pos = cursor + 1;
         }
     }
 }
