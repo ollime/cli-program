@@ -68,7 +68,8 @@ impl Widget for &App {
 
         if self.show_popup {
             let block = Block::bordered().title("Export");
-            let paragraph = Paragraph::new("Export as HTML file? [Y/N]").block(block);
+            let paragraph = Paragraph::new("Export as HTML file? [Y/N]
+                \n\nFiles are saved in the folder named 'data'").block(block);
             let popup_area = App::popup_area(right_layout[1], 90, 90);
             Clear.render(popup_area, buf);
             paragraph.render(popup_area, buf);
@@ -201,6 +202,7 @@ impl CurrentScreen {
             ("* Left/Right", "Switch tab"),
             ("* Up/Down", "Switch sidebar options"),
             ("Ctrl + E", "Change edit mode"),
+            ("Ctrl + S", "Export/save"),
         ]);
 
         let list_items: Vec<ListItem> = list_items

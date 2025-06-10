@@ -125,10 +125,13 @@ impl App {
 
             (_, KeyCode::Char('y')) => {
                 if self.show_popup {
-                    let current_tab_index = self.current_screen as usize;
-                    let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
                     
-                    let _ = Export::export_as_html(current_tab_data, self.current_screen.to_string());
+                    if self.current_screen.to_string() != "Main" {
+                        let current_tab_index = self.current_screen as usize;
+                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let _ = Export::export_as_html(current_tab_data, self.current_screen.to_string());
+                        self.show_popup = false; // close popup
+                    }
                 }
             }
             (_, KeyCode::Char('n')) => {

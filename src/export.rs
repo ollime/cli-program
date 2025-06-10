@@ -3,20 +3,22 @@
 use std::fs::File;
 use std::path::Path;
 use std::io;
-use std::io::Read;
+// use std::io::Read;
 use std::io::Write;
+use std::fs;
 
 pub struct Export {
 
 }
 
 impl Export {
-    pub fn export_as_html(input_value: &String, tab_name: String) -> io::Result<()> {
-        let path: String = format!("data/{}.html", tab_name);
+    pub fn export_as_html(input_value: &String, file_name: String) -> io::Result<()> {
+        let path: String = format!("data/{}.html", file_name);
         let path = Path::new(&path);
         let display = path.display();
 
         // opens a file in write-only mode
+        fs::create_dir_all("data")?; // check for directory
         let mut file = match File::create(&path) {
             Err(why) => panic!("couldn't create {}: {}", display, why),
             Ok(file) => file,
@@ -25,9 +27,12 @@ impl Export {
         // inserts input_value into the file
         match file.write_all(&input_value.as_bytes()) {
             Err(why) => panic!("couldn't write to {}: {}", display, why),
-            Ok(_) => println!("successfully wrote to {}", display),
+            Ok(_) => (),
         }
-    
+        Ok(())
+    }
+
+    fn _copy_as_html() {
         // let mut file = match File::open(&path) {
         //     Err(why) => panic!("couldn't open {}: {}", display, why),
         //     Ok(file) => file,
@@ -38,8 +43,6 @@ impl Export {
         //     Err(why) => panic!("couldn't read {}: {}", display, why),
         //     Ok(_) => print!("{} contains:\n{}", display, s),
         // }
-
-        Ok(())
     }
 }
 
