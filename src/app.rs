@@ -82,12 +82,12 @@ impl App {
     /// Handles the key events and updates the state of [`App`].
     fn on_key_event(&mut self, key: KeyEvent) {
         match (key.modifiers, key.code) {
-            // TODO: fix overlapping keys (e.g. y/n will not write in text input)
-
             // Exits the program
-            (_, KeyCode::Esc | KeyCode::Char('q'))
+            (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            
+            (_, KeyCode::Char('q')) => if !self.can_edit { self.quit() } else {self.edit_text('q')}
+
+
             (_, KeyCode::Char('[')) => self.previous_tab(),
             (_, KeyCode::Char(']')) => self.next_tab(),
             
@@ -127,7 +127,6 @@ impl App {
 
             (_, KeyCode::Char('y')) => {
                 if self.show_popup {
-                    
                     if self.current_screen.to_string() != "Main" {
                         let current_tab_index = self.current_screen as usize;
                         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
@@ -135,10 +134,16 @@ impl App {
                         self.show_popup = false; // close popup
                     }
                 }
+                else {
+                    self.edit_text('y');
+                }
             }
             (_, KeyCode::Char('n')) => {
                 if self.show_popup {
                     self.show_popup = false;
+                }
+                else {
+                    self.edit_text('n');
                 }
             }
 
@@ -147,25 +152,7 @@ impl App {
             },
 
             // editing text input
-            (_, KeyCode::Char(value)) => {
-                if self.can_edit {
-                    let current_tab_index = self.current_screen as usize;
-                    // cannot be first index (main tab)
-                    if current_tab_index > 0 {
-                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                        let mut new_content = current_tab_data.clone();
-
-                        // returns cursor_pos or new length depending on which one is smaller
-                        // if cursor_pos is smaller, places at location in text
-                        // if length is smaller, then places cursor at end of text
-                        let cursor = self.cursor_pos.min(new_content.len());
-
-                        new_content.insert(cursor, value);
-                        self.tab_data.insert(current_tab_index, new_content);
-                        self.cursor_pos = cursor + 1;
-                    }
-                }
-            },
+            (_, KeyCode::Char(value)) => self.edit_text(value),
             (_, KeyCode::Enter) => {
                 if self.can_edit {
                     let current_tab_index = self.current_screen as usize;
@@ -244,6 +231,26 @@ impl App {
         if let Some(newline_index) = str_slice.rfind('\n') {
             let line_diff = &str_slice[newline_index..].len(); // difference between cursor_pos and \n
             self.cursor_pos = self.cursor_pos - line_diff;
+        }
+    }
+
+    fn edit_text(&mut self, value: char) {
+        if self.can_edit {
+            let current_tab_index = self.current_screen as usize;
+            // cannot be first index (main tab)
+            if current_tab_index > 0 {
+                let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                let mut new_content = current_tab_data.clone();
+
+                // returns cursor_pos or new length depending on which one is smaller
+                // if cursor_pos is smaller, places at location in text
+                // if length is smaller, then places cursor at end of text
+                let cursor = self.cursor_pos.min(new_content.len());
+
+                new_content.insert(cursor, value);
+                self.tab_data.insert(current_tab_index, new_content);
+                self.cursor_pos = cursor + 1;
+            }
         }
     }
 }
