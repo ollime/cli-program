@@ -42,6 +42,7 @@ impl Export {
             }
         ";
         
+        // TODO: retain newlines in html file
         let html_text = format!(
 "<!DOCTYPE html>
 <html lang=\"en\">
@@ -72,15 +73,3 @@ impl Export {
         // }
     }
 }
-
-// struct Export {
-//     data: HashMap<String, String>
-// }
-
-// impl Export {
-//     pub fn new(data: HashMap<String, String>) -> Self {
-//         Self {
-//             data: data,
-//         }
-//     }
-// }

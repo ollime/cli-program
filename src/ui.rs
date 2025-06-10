@@ -29,7 +29,6 @@ impl Widget for &App {
                 Constraint::Fill(1),
             ])
             .split(area);
-
         self.render_title(title_layout[0], buf);
 
         let content_layout = Layout::default()
@@ -46,11 +45,11 @@ impl Widget for &App {
         left_block.render(content_layout[0], buf); // render block ui
         self.render_side_bar(left_block_area, buf);
         
+        // render right_block contents
         let right_block = Block::bordered(); // block ui
         let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
         right_block.render(content_layout[1], buf); // render block ui
 
-        // render right_block contents
         let right_layout = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints(vec![
@@ -58,6 +57,8 @@ impl Widget for &App {
                     Constraint::Fill(1)
                 ])
                 .split(right_block_area);
+
+        // render tabs
         self.render_tabs(right_layout[0], buf); // render tab titles
         match self.current_screen { // render tab content
             CurrentScreen::Main => self.current_screen.render_main_tab(right_layout[1], buf),
@@ -66,13 +67,9 @@ impl Widget for &App {
             CurrentScreen::Tab3 => self.current_screen.render_tab(self, right_layout[1], buf),
         }
 
+        // render popup
         if self.show_popup {
-            let block = Block::bordered().title("Export");
-            let paragraph = Paragraph::new("Export as HTML file? [Y/N]
-                \n\nFiles are saved in the folder named 'data'").block(block);
-            let popup_area = App::popup_area(right_layout[1], 90, 90);
-            Clear.render(popup_area, buf);
-            paragraph.render(popup_area, buf);
+            self.render_popup(right_layout[1], buf);
         }
     }
 }
@@ -167,6 +164,15 @@ impl App {
     }
 
     // renders popup area
+    fn render_popup(&self, area: Rect, buf: &mut Buffer) {
+        let block = Block::bordered().title("Export");
+        let paragraph = Paragraph::new("Export as HTML file? [Y/N]
+            \n\nFiles are saved in the folder named 'data'").block(block);
+        let popup_area = App::popup_area(area, 90, 90);
+        Clear.render(popup_area, buf);
+        paragraph.render(popup_area, buf);
+    }
+
     fn popup_area(area: Rect, percent_x: u16, percent_y: u16) -> Rect {
         let vertical = Layout::vertical([Constraint::Percentage(percent_y)]).flex(Flex::Center);
         let horizontal = Layout::horizontal([Constraint::Percentage(percent_x)]).flex(Flex::Center);
