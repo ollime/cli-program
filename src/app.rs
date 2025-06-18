@@ -3,7 +3,7 @@ use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use strum_macros::{Display, EnumIter, FromRepr};
 use strum::IntoEnumIterator;
-use std::collections::HashMap;
+use std::{collections::HashMap, thread::current};
 
 use crate::export::Export;
 
@@ -234,10 +234,19 @@ impl App {
             let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
 
             if current_tab_data.len() > 0 { // cannot delete if there is no text
-                let new_content = current_tab_data
-                    .strip_suffix(|_: char| true)
-                    .unwrap()
-                    .to_string();
+                let mut new_content = current_tab_data.clone();
+
+                if self.cursor_pos < current_tab_data.len() {
+                    let remove_pos = self.cursor_pos - 1;
+                    new_content.remove(remove_pos);
+                    self.cursor_pos = self.cursor_pos - 1;
+                }
+                else {
+                    new_content = new_content
+                        .strip_suffix(|_: char| true)
+                        .unwrap()
+                        .to_string();
+                }
 
                 self.tab_data.insert(
                     current_tab_index,
