@@ -184,11 +184,19 @@ impl App {
 
         let current_tab_index = self.current_screen as usize;
         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-        let str_slice = &current_tab_data[self.cursor_pos..];
+        let str_slice = &current_tab_data[self.cursor_pos..]; // string after cursor_pos
 
         if let Some(newline_index) = str_slice.find('\n') {
             let line_diff = &str_slice[..newline_index].len(); // difference between cursor_pos and \n
-            self.cursor_pos = self.cursor_pos + line_diff + 1;
+            
+            // to put cursor at the end of the next line
+            let next_str_slice = &str_slice[(newline_index + 1)..];
+            let next_new_line = next_str_slice.find('\n').unwrap_or(0);
+
+            self.cursor_pos = self.cursor_pos + line_diff + next_new_line + 1;
+        }
+        else {
+            println!("!!!!!!")
         }
     }
     
@@ -197,11 +205,12 @@ impl App {
         // then find next \n character
         // then find num of characters between cursor_pos and \n
         // add that num to cursor_pos
-
+        
         let current_tab_index = self.current_screen as usize;
         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-        let str_slice = &current_tab_data[..self.cursor_pos];
-
+        let str_slice = &current_tab_data[..self.cursor_pos]; // string before cursor_pos
+        
+        
         if let Some(newline_index) = str_slice.rfind('\n') {
             let line_diff = &str_slice[newline_index..].len(); // difference between cursor_pos and \n
             self.cursor_pos = self.cursor_pos - line_diff;

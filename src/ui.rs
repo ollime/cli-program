@@ -110,7 +110,7 @@ impl App {
                     false => Color::Red,
                 }),
                 "  -  ".white(),
-                Span::from(format!("line: {}", self.get_line_length())),
+                Span::from(format!("line: {}", self.get_line_count())),
                 "  -  ".white(),
                 Span::from(format!("character count: {}", self.get_character_count()))
             ]
@@ -124,7 +124,7 @@ impl App {
         data.len()
     }
 
-    pub fn get_line_length(&self) -> usize {
+    pub fn get_line_count(&self) -> usize {
         let current_tab_index = self.current_screen as usize;
         let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
         let data = data.split('\n');
