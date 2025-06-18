@@ -1,9 +1,7 @@
 // Handles exporting file to HTML
-// use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::io;
-// use std::io::Read;
 use std::io::Write;
 use std::fs;
 use std::process::Command;
@@ -78,7 +76,7 @@ impl Export {
     "html {
             background-color: black;
             color: white;
-            font: 1em 'arial';
+            font-family: \"Cascadia Code\", monospace, Arial;
             }
         html,
         body {
@@ -107,6 +105,14 @@ impl Export {
     <meta charset=\"UTF-8\" />
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />
     <title>{}</title>
+
+    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />
+    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />
+    <link
+      href=\"https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&display=swap\"
+      rel=\"stylesheet\"
+    />
+
     <style>
         {}
     </style>
