@@ -6,6 +6,7 @@ use std::io;
 // use std::io::Read;
 use std::io::Write;
 use std::fs;
+use std::process::Command;
 
 pub struct Export {
     
@@ -33,7 +34,31 @@ impl Export {
         }
         Ok(())
     }
-    
+
+    pub fn open_html_in_browser(input_value: &str, file_name: String) {
+        let _ = Self::export_as_html(input_value, file_name.clone());
+        let path: String = format!("data/{}.html", file_name);
+
+        if cfg!(target_os = "windows") {
+            Command::new("cmd")
+                .args(&["/C", "start", "", &path])
+                .spawn()
+                .unwrap();
+        } 
+        else if cfg!(target_os = "linux") {
+            Command::new("xdg-open")
+                .arg(&path)
+                .spawn()
+                .unwrap();
+        }
+        else if cfg!(target_os = "macos") {
+            Command::new("open")
+                .arg(&path)
+                .spawn()
+                .unwrap();
+        };
+    }
+
     fn format_html(file_name: &str, input_value: &str) -> String {
         // TODO: handle formatting with regex
         let text_content: Vec<_> = input_value.split('\n')
@@ -71,7 +96,7 @@ impl Export {
             margin: 20px;
         }
         h1 {
-            font-size: 1.5em;
+            font-size: 1em;
         }";
         
         // keep alignment/tabbing like this to ensure resulting HTML file is formatted correctly

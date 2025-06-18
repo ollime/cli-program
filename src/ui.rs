@@ -167,6 +167,7 @@ impl App {
     fn render_popup(&self, area: Rect, buf: &mut Buffer) {
         let block = Block::bordered().title("Export");
         let paragraph = Paragraph::new("Export as HTML file? [Y/N]
+            \n\nTo export and open the HTML file in browser, use Ctrl + O.
             \n\nFiles are saved in the folder named 'data'").block(block);
         let popup_area = App::popup_area(area, 90, 90);
         Clear.render(popup_area, buf);
@@ -209,6 +210,7 @@ impl CurrentScreen {
             ("* Up/Down", "Switch sidebar options"),
             ("Ctrl + E", "Change edit mode"),
             ("Ctrl + S", "Export/save"),
+            ("Ctrl + O", "Open HTML file")
         ]);
 
         let list_items: Vec<ListItem> = list_items

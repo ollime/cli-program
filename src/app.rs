@@ -3,7 +3,7 @@ use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use strum_macros::{Display, EnumIter, FromRepr};
 use strum::IntoEnumIterator;
-use std::{collections::HashMap, thread::current};
+use std::collections::HashMap;
 
 use crate::export::Export;
 
@@ -146,6 +146,12 @@ impl App {
                 else {
                     self.insert_char('n');
                 }
+            }
+
+            (KeyModifiers::CONTROL, KeyCode::Char('o')) => {
+                let current_tab_index = self.current_screen as usize;
+                let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                Export::open_html_in_browser(current_tab_data, self.current_screen.to_string());
             }
 
             // Toggle edit mode
