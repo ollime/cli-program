@@ -89,9 +89,16 @@ impl Export {
         .container {
             flex: 1;
             border: 2px solid white;
-            padding: 20px;
             box-sizing: border-box;
             margin: 20px;
+        }
+        .title-container {
+            border-bottom: 2px solid white;
+            padding: 0 10px;
+        }
+        .content-container {
+            line-height: 7px;
+            padding: 0 10px;
         }
         h1 {
             font-size: 1em;
@@ -119,8 +126,12 @@ impl Export {
   </head>
   <body>
     <div class=\"container\">
-      <h1>{}</h1>
-{}
+        <div class=\"title-container\">
+        <h1>{}</h1>
+        </div>
+        <div class=\"content-container\">
+    {}
+        </div>
     </div>
   </body>
 </html>", file_name, css_styles, file_name, text_content);

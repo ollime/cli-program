@@ -29,7 +29,7 @@ pub struct App {
     pub can_edit: bool,
     pub tab_data: HashMap<usize, String>,
     pub cursor_pos: usize,
-    pub show_popup: bool,
+    pub show_export_popup: bool,
 }
 
 impl App {
@@ -41,7 +41,7 @@ impl App {
             can_edit: true,
             tab_data: HashMap::new(),
             cursor_pos: 0,
-            show_popup: false,
+            show_export_popup: false,
         }
     }
 
@@ -85,7 +85,11 @@ impl App {
             // Exits the program
             (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
-            (_, KeyCode::Char('q')) => if !self.can_edit { self.quit() } else {self.insert_char('q')}
+            (_, KeyCode::Char('q')) => {
+                if self.show_export_popup { self.show_export_popup = false }
+                else if !self.can_edit { self.quit() }
+                else {self.insert_char('q')}
+            }
 
             // Switching current screen
             (_, KeyCode::Char('[')) => self.previous_tab(),
@@ -124,27 +128,19 @@ impl App {
 
             // Export/save
             (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
-                self.show_popup = !self.show_popup
+                self.show_export_popup = !self.show_export_popup
             }
-            (_, KeyCode::Char('y')) => {
-                if self.show_popup { // confirm popup and save data
+            (_, KeyCode::Char('0')) => {
+                if self.show_export_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
                         let current_tab_index = self.current_screen as usize;
                         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
                         let _ = Export::export_as_html(current_tab_data, self.current_screen.to_string());
-                        self.show_popup = false; // close popup
+                        self.show_export_popup = false; // close popup
                     }
                 }
                 else {
-                    self.insert_char('y');
-                }
-            }
-            (_, KeyCode::Char('n')) => {
-                if self.show_popup {
-                    self.show_popup = false;
-                }
-                else {
-                    self.insert_char('n');
+                    self.insert_char('0');
                 }
             }
 

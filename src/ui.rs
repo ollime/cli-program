@@ -2,7 +2,7 @@ use ratatui::{
     style::{Stylize, Color},
     text::{Line, Span},
     widgets::{Widget, Block, Paragraph, Padding, Tabs,
-        List, ListItem, Borders, Clear},
+        List, ListItem, Borders, Clear, Wrap},
     buffer::Buffer,
     layout::{Rect, Flex},
 };
@@ -68,8 +68,8 @@ impl Widget for &App {
         }
 
         // render popup
-        if self.show_popup {
-            self.render_popup(right_layout[1], buf);
+        if self.show_export_popup {
+            self.render_export_popup(right_layout[1], buf);
         }
     }
 }
@@ -164,15 +164,27 @@ impl App {
     }
 
     // renders popup area
-    fn render_popup(&self, area: Rect, buf: &mut Buffer) {
-        let block = Block::bordered().title("Export");
-        let paragraph = Paragraph::new("Export as HTML file? [Y/N]
-            \n\nTo export and open the HTML file in browser, use Ctrl + O.
-            \n\nFiles are saved in the folder named 'data'").block(block);
+    fn render_export_popup(&self, area: Rect, buf: &mut Buffer) {
+        let block = Block::bordered().title("Export as file");
+        let paragraph = Paragraph::new("
+        Files are saved in the folder named 'data'
+    \n\n[0] Styled HTML - Export as styled .html
+    [1] Default HTML - Export as .html with minimal styling
+    [2] Text - Exports as .txt
+    [3] Markdown - Exports as .md
+
+    [Q] - Close prompt
+            \n\nTo open a file, use the Ctrl + O command.")
+            .block(block).wrap(Wrap { trim: true });
         let popup_area = App::popup_area(area, 90, 90);
         Clear.render(popup_area, buf);
         paragraph.render(popup_area, buf);
     }
+
+    //             \n\nOPEN FILE
+    // [3] Styled HTML - Opens .html file with default styles in browser
+    // [4] Default HTML - Opens .html file with minimal styling in file explorer. This file can then be modified with custom styles.
+
 
     fn popup_area(area: Rect, percent_x: u16, percent_y: u16) -> Rect {
         let vertical = Layout::vertical([Constraint::Percentage(percent_y)]).flex(Flex::Center);
