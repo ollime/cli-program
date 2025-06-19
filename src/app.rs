@@ -29,7 +29,7 @@ pub struct App {
     pub can_edit: bool,
     pub tab_data: HashMap<usize, String>,
     pub cursor_pos: usize,
-    pub show_export_popup: bool,
+    pub show_popup: bool,
 }
 
 impl App {
@@ -41,7 +41,7 @@ impl App {
             can_edit: true,
             tab_data: HashMap::new(),
             cursor_pos: 0,
-            show_export_popup: false,
+            show_popup: false,
         }
     }
 
@@ -86,7 +86,7 @@ impl App {
             (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
             (_, KeyCode::Char('q')) => {
-                if self.show_export_popup { self.show_export_popup = false }
+                if self.show_popup { self.show_popup = false }
                 else if !self.can_edit { self.quit() }
                 else {self.insert_char('q')}
             }
@@ -127,35 +127,63 @@ impl App {
             }
 
             // Export/save
-            (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
-                self.show_export_popup = !self.show_export_popup
-            }
             (_, KeyCode::Char('0')) => {
-                if self.show_export_popup { // confirm popup and save data
+                if self.show_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
                         let current_tab_index = self.current_screen as usize;
                         let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                        let _ = Export::export_as_html(current_tab_data, self.current_screen.to_string());
-                        self.show_export_popup = false; // close popup
+                        let _ = Export::export_as_styled_html(current_tab_data, self.current_screen.to_string());
+                        self.show_popup = false; // close popup
                     }
                 }
                 else {
                     self.insert_char('0');
                 }
             }
+            (_, KeyCode::Char('1')) => {
+                if self.show_popup { // confirm popup and save data
+                    if self.current_screen.to_string() != "Main" {
+                        let current_tab_index = self.current_screen as usize;
+                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let _ = Export::export_as_plain_html(current_tab_data, self.current_screen.to_string());
+                        self.show_popup = false; // close popup
+                    }
+                }
+                else {
+                    self.insert_char('1');
+                }
+            }(_, KeyCode::Char('2')) => {
+                if self.show_popup { // confirm popup and save data
+                    if self.current_screen.to_string() != "Main" {
+                        let current_tab_index = self.current_screen as usize;
+                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let _ = Export::export_as_text(current_tab_data, self.current_screen.to_string());
+                        self.show_popup = false; // close popup
+                    }
+                }
+                else {
+                    self.insert_char('2');
+                }
+            }
 
             (KeyModifiers::CONTROL, KeyCode::Char('o')) => {
                 let current_tab_index = self.current_screen as usize;
                 let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                Export::open_html_in_browser(current_tab_data, self.current_screen.to_string());
+                Export::open_in_file_explorer(current_tab_data, self.current_screen.to_string());
+                self.show_popup = false
             }
 
-            // Toggle edit mode
+            // opens export popup
+            (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
+                self.show_popup = !self.show_popup
+            }
+
+            // toggle edit mode
             (KeyModifiers::CONTROL, KeyCode::Char('e')) => {
                 self.can_edit = !self.can_edit;
             },
 
-            // Editing text input
+            // editing text input
             (_, KeyCode::Char(value)) => self.insert_char(value),
             (_, KeyCode::Enter) => self.insert_newline(),
             (_, KeyCode::Backspace) => self.delete_char(),

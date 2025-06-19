@@ -68,7 +68,7 @@ impl Widget for &App {
         }
 
         // render popup
-        if self.show_export_popup {
+        if self.show_popup {
             self.render_export_popup(right_layout[1], buf);
         }
     }
@@ -169,7 +169,7 @@ impl App {
         let paragraph = Paragraph::new("
         Files are saved in the folder named 'data'
     \n\n[0] Styled HTML - Export as styled .html
-    [1] Default HTML - Export as .html with minimal styling
+    [1] Plain HTML - Export as .html with minimal styling
     [2] Text - Exports as .txt
     [3] Markdown - Exports as .md
 
@@ -183,7 +183,7 @@ impl App {
 
     //             \n\nOPEN FILE
     // [3] Styled HTML - Opens .html file with default styles in browser
-    // [4] Default HTML - Opens .html file with minimal styling in file explorer. This file can then be modified with custom styles.
+    // [4] Plain HTML - Opens .html file with minimal styling in file explorer. This file can then be modified with custom styles.
 
 
     fn popup_area(area: Rect, percent_x: u16, percent_y: u16) -> Rect {

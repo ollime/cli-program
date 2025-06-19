@@ -11,69 +11,9 @@ pub struct Export {
 }
 
 impl Export {
-    pub fn export_as_html(input_value: &str, file_name: String) -> io::Result<()> {
-        let path: String = format!("data/{}.html", file_name);
-        let path = Path::new(&path);
-        let display = path.display();
-        
-        // opens a file in write-only mode
-        fs::create_dir_all("data")?; // check for directory
-        let mut file = match File::create(&path) {
-            Err(why) => panic!("couldn't create {}: {}", display, why),
-            Ok(file) => file,
-        };
-        
-        let html_text = Export::format_html(&file_name, input_value);
-        
-        // inserts input_value into the file
-        match file.write_all(&html_text.as_bytes()) {
-            Err(why) => panic!("couldn't write to {}: {}", display, why),
-            Ok(_) => (),
-        }
-        Ok(())
-    }
-
-    pub fn open_html_in_browser(input_value: &str, file_name: String) {
-        let _ = Self::export_as_html(input_value, file_name.clone());
-        let path: String = format!("data/{}.html", file_name);
-
-        if cfg!(target_os = "windows") {
-            Command::new("cmd")
-                .args(&["/C", "start", "", &path])
-                .spawn()
-                .unwrap();
-        } 
-        else if cfg!(target_os = "linux") {
-            Command::new("xdg-open")
-                .arg(&path)
-                .spawn()
-                .unwrap();
-        }
-        else if cfg!(target_os = "macos") {
-            Command::new("open")
-                .arg(&path)
-                .spawn()
-                .unwrap();
-        };
-    }
-
-    fn format_html(file_name: &str, input_value: &str) -> String {
-        // TODO: handle formatting with regex
-        let text_content: Vec<_> = input_value.split('\n')
-            .map(|line| {
-                if line.len() > 0 {
-                    format!("\t\t\t<p>{}</p>", line)
-                }
-                else {
-                    String::from("\t\t\t<br>")
-                }
-            })
-            .collect();
-        // creates a new line for html formatting purposes only
-        let text_content = text_content.join("\n"); // no visual effect on page
-
-        let css_styles = 
-    "html {
+    pub fn export_as_styled_html(input_value: &str, file_name: String) -> io::Result<()> {
+    let css_styles: String = 
+    String::from("html {
             background-color: black;
             color: white;
             font-family: \"Cascadia Code\", monospace, Arial;
@@ -102,7 +42,95 @@ impl Export {
         }
         h1 {
             font-size: 1em;
-        }";
+        }");
+
+        Export::export_as_html(input_value, file_name, css_styles)
+    }
+
+    pub fn export_as_plain_html(input_value: &str, file_name: String) -> io::Result<()> {
+        let css_styles = String::from("");
+        Export::export_as_html(input_value, file_name, css_styles)
+    }
+
+    pub fn export_as_text(input_value: &str, file_name: String) -> io::Result<()> {
+        let path: String = format!("data/{}.txt", file_name);
+        let path = Path::new(&path);
+        let display = path.display();
+
+        // opens a file in write-only mode
+        fs::create_dir_all("data")?; // check for directory
+        let mut file = match File::create(&path) {
+            Err(why) => panic!("couldn't create {}: {}", display, why),
+            Ok(file) => file,
+        };
+        
+        // inserts input_value into the file
+        match file.write_all(&input_value.as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display, why),
+            Ok(_) => (),
+        }
+        Ok(())
+    }
+
+    fn export_as_html(input_value: &str, file_name: String, css_styles: String) -> io::Result<()> {
+        let path: String = format!("data/{}.html", file_name);
+        let path = Path::new(&path);
+        let display = path.display();
+        
+        // opens a file in write-only mode
+        fs::create_dir_all("data")?; // check for directory
+        let mut file = match File::create(&path) {
+            Err(why) => panic!("couldn't create {}: {}", display, why),
+            Ok(file) => file,
+        };
+        
+        let html_text = Export::format_html(&file_name, input_value, css_styles);
+        
+        // inserts input_value into the file
+        match file.write_all(&html_text.as_bytes()) {
+            Err(why) => panic!("couldn't write to {}: {}", display, why),
+            Ok(_) => (),
+        }
+        Ok(())
+    }
+
+    pub fn open_in_file_explorer(input_value: &str, file_name: String) {
+        let path = String::from("data");
+
+        if cfg!(target_os = "windows") {
+            Command::new("cmd")
+                .args(&["/C", "start", "", &path])
+                .spawn()
+                .expect("start command doesn't work");
+        } 
+        else if cfg!(target_os = "linux") {
+            Command::new("xdg-open")
+                .arg(&path)
+                .spawn()
+                .expect("open command doesn't work");
+        }
+        else if cfg!(target_os = "macos") {
+            Command::new("open")
+                .arg(&path)
+                .spawn()
+                .expect("open command doesn't work");
+        };
+    }
+
+    fn format_html(file_name: &str, input_value: &str, css_styles: String) -> String {
+        // TODO: handle formatting with regex
+        let text_content: Vec<_> = input_value.split('\n')
+            .map(|line| {
+                if line.len() > 0 {
+                    format!("\t\t\t<p>{}</p>", line)
+                }
+                else {
+                    String::from("\t\t\t<br>")
+                }
+            })
+            .collect();
+        // creates a new line for html formatting purposes only
+        let text_content = text_content.join("\n"); // no visual effect on page
         
         // keep alignment/tabbing like this to ensure resulting HTML file is formatted correctly
         let html_text = format!(
