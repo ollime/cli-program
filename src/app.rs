@@ -175,7 +175,7 @@ impl App {
 
             // opens export popup
             (KeyModifiers::CONTROL, KeyCode::Char('s')) => {
-                self.show_popup = !self.show_popup
+                self.show_popup = !self.show_popup;
             }
 
             // toggle edit mode
@@ -184,7 +184,14 @@ impl App {
             },
 
             // editing text input
-            (_, KeyCode::Char(value)) => self.insert_char(value),
+            (_, KeyCode::Char(value)) => {
+                if value == char::from('\n') {
+                    self.insert_newline()
+                }
+                else if value != char::from('│') {
+                    self.insert_char(value)
+                }
+            }
             (_, KeyCode::Enter) => self.insert_newline(),
             (_, KeyCode::Backspace) => self.delete_char(),
             _ => {}
