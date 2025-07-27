@@ -42,6 +42,14 @@ impl Export {
         }
         h1 {
             font-size: 1em;
+        }
+        li {
+            list-style-type: disc;
+            margin: 20px;
+        }
+        p,
+        li {
+            font-size: 1em;
         }");
 
         Export::export_as_html(input_value, file_name, css_styles)
@@ -94,7 +102,7 @@ impl Export {
         Ok(())
     }
 
-    pub fn open_in_file_explorer(input_value: &str, file_name: String) {
+    pub fn open_in_file_explorer() {
         let path = String::from("data");
 
         if cfg!(target_os = "windows") {
@@ -118,19 +126,41 @@ impl Export {
     }
 
     fn format_html(file_name: &str, input_value: &str, css_styles: String) -> String {
-        // TODO: handle formatting with regex
-        let text_content: Vec<_> = input_value.split('\n')
-            .map(|line| {
+        let split_text: Vec<&str> = input_value.split('\n').collect();
+        let text_content: Vec<_> = split_text
+            .clone()
+            .into_iter()
+            .enumerate()
+            .map(|(index, line)| {
                 if line.len() > 0 {
-                    format!("\t\t\t<p>{}</p>", line)
+                    if line.starts_with("* ") {
+                        // parses list items
+                        if (index != 0 && index == split_text.len()) {
+                            if !split_text[index - 1].starts_with("* ") {
+                                format!("\t\t\t<ul><li>{}</li>", line.strip_prefix("* ").unwrap())
+                            }
+                            else if !split_text[index + 1].starts_with("* ") {
+                                format!("\t\t\t<li>{}</li></ul>", line.strip_prefix("* ").unwrap())
+                            }
+                            else {
+                                format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
+                            };
+                        }
+                        format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
+                    }
+                    else {
+                        // paragraph html element
+                        format!("\t\t\t<p>{}</p>", line)
+                    }
                 }
                 else {
+                    // blank line
                     String::from("\t\t\t<br>")
                 }
             })
             .collect();
         // creates a new line for html formatting purposes only
-        let text_content = text_content.join("\n"); // no visual effect on page
+        let text_content = text_content.join("\n"); // no visual effect on page        
         
         // keep alignment/tabbing like this to ensure resulting HTML file is formatted correctly
         let html_text = format!(

@@ -169,7 +169,7 @@ impl App {
             (KeyModifiers::CONTROL, KeyCode::Char('o')) => {
                 let current_tab_index = self.current_screen as usize;
                 let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
-                Export::open_in_file_explorer(current_tab_data, self.current_screen.to_string());
+                Export::open_in_file_explorer();
                 self.show_popup = false
             }
 
