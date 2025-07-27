@@ -42,17 +42,63 @@ impl Widget for &App {
         else {
             self.render_note(title_layout[1], buf); // render a specific note
         }
+
+        if self.show_popup {
+            self.render_export_popup(area, buf);
+        }
+        
     }
 }
 
 impl App {
+    fn render_commands_info(&self, area: Rect, buf: &mut Buffer) {
+        // // render text
+        // let text = "Commands\n* if edit mode is off\n";
+        // Paragraph::new(text)
+        //     .render(area, buf);
+
+        // list rendering
+        let list_items: BTreeMap<&str, &str> = BTreeMap::from([
+            ("", "Commands"),
+            ("[ ]", "Switch tab"),
+            ("* Left/Right", "Switch tab"),
+            ("* Up/Down", "Switch sidebar options"),
+            ("Ctrl + E", "Change edit mode"),
+            ("Ctrl + S", "Export/save"),
+            ("Ctrl + O", "Open HTML file")
+        ]);
+
+        let list_items: Vec<ListItem> = list_items
+            .into_iter()
+            .map(|item| ListItem::new(
+                Line::from(
+                    vec![
+                        match item.0.contains("*") {
+                            true => item.0.magenta().bold(),
+                            false => item.0.yellow().bold(), // using Stylize syntax
+                        },
+                        " ".into(),
+                        item.1.into()
+                    ]
+                )
+            ))
+            .collect();
+
+        Widget::render(&List::new(list_items), area, buf);
+    }
+
     fn render_tab_list(&self, area: Rect, buf: &mut Buffer) {
+        let layout = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Max(8), // top 2 lines for title block
+                Constraint::Fill(1),
+            ])
+            .split(area);
+        
         const TODO_HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(Color::Cyan);
         const NORMAL_ROW_BG: Color = SLATE.c950;
-        const ALT_ROW_BG_COLOR: Color = SLATE.c900;
         const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
-        const TEXT_FG_COLOR: Color = SLATE.c200;
-        const COMPLETED_TEXT_FG_COLOR: Color = GREEN.c500;
        let block = Block::new()
             .title(Line::raw("Use [ and ] to navigate tabs.").centered())
             .borders(Borders::TOP)
@@ -76,8 +122,9 @@ impl App {
             .highlight_style(SELECTED_STYLE)
             .highlight_symbol(">")
             .highlight_spacing(HighlightSpacing::Always);
+        ratatui::prelude::StatefulWidget::render(tabs_widget, layout[1], buf, &mut state);
 
-        ratatui::prelude::StatefulWidget::render(tabs_widget, area, buf, &mut state);
+        self.render_commands_info(layout[0], buf); // render tab titles
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
@@ -129,6 +176,7 @@ impl App {
             .constraints(vec![
                 Constraint::Max(3), // top 2 lines for title block
                 Constraint::Fill(1),
+                Constraint::Max(1)
             ])
             .split(area);
 
@@ -138,9 +186,13 @@ impl App {
         let block = Block::new()
             .title(Line::raw(self.tabs[self.current_tab_index].tab_name.clone()).bold().cyan());
         block.render(layout[0], buf);
-
+        
         TextInput::new(&text, cursor_pos)
-            .render(layout[1], buf);
+        .render(layout[1], buf);
+
+        let text = "Press esc or CTRL + C to return to notes list";
+        Line::from(text)
+            .render(layout[2], buf);
     }
 
     // renders popup area
@@ -167,49 +219,5 @@ impl App {
         let [area] = vertical.areas(area);
         let [area] = horizontal.areas(area);
         area
-    }
-
-    fn render_main_tab(self, area: Rect, buf: &mut Buffer) {
-        let main_layout = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Max(3),
-                Constraint::Fill(1)
-            ])
-            .split(area);
-
-        // render text
-        let text = "Commands\n* if edit mode is off\n";
-        Paragraph::new(text)
-            .render(main_layout[0], buf);
-
-        // list rendering
-        let list_items: BTreeMap<&str, &str> = BTreeMap::from([
-            ("[ ]", "Switch tab"),
-            ("* Left/Right", "Switch tab"),
-            ("* Up/Down", "Switch sidebar options"),
-            ("Ctrl + E", "Change edit mode"),
-            ("Ctrl + S", "Export/save"),
-            ("Ctrl + O", "Open HTML file")
-        ]);
-
-        let list_items: Vec<ListItem> = list_items
-            .into_iter()
-            .map(|item| ListItem::new(
-                Line::from(
-                    vec![
-                        match item.0.contains("*") {
-                            true => item.0.magenta().bold(),
-                            false => item.0.yellow().bold(), // using Stylize syntax
-                        },
-                        " ".into(),
-                        item.1.into()
-                    ]
-                )
-            ))
-            .collect();
-
-        // render list inside the block
-        Widget::render(&List::new(list_items), main_layout[1], buf);
     }
 }

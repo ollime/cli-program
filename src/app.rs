@@ -95,7 +95,14 @@ impl App {
         match (key.modifiers, key.code) {
             // Exits the program
             (_, KeyCode::Esc)
-            | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => self.quit(),
+            | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => {
+                if (self.can_select_tab) {
+                    self.quit()
+                }
+                else {
+                    self.can_select_tab = true;
+                }
+            },
             (_, KeyCode::Char('q')) => {
                 if self.show_popup { self.show_popup = false }
                 else if !self.can_edit { self.quit() }
