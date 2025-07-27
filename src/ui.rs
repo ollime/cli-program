@@ -7,7 +7,7 @@ use ratatui::{
     buffer::Buffer,
     layout::{Rect, Flex},
     style::{
-        palette::tailwind::{BLUE, GREEN, SLATE}
+        palette::tailwind::{SLATE, GREEN}
     }
 };
 use strum::IntoEnumIterator;
@@ -36,7 +36,7 @@ impl Widget for &App {
 
         self.render_title(title_layout[0], buf);
 
-        if (self.can_select_tab) {
+        if self.can_select_tab {
             self.render_tab_list(title_layout[1], buf); // render tab titles
         }
         else {
@@ -113,47 +113,34 @@ impl App {
 
     pub fn get_character_count(&self) -> usize {
         let current_tab_index = self.current_screen as usize;
-        let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
+        let data = &self.tabs[self.current_tab_index].text;
         data.len()
     }
 
     pub fn get_line_count(&self) -> usize {
         let current_tab_index = self.current_screen as usize;
-        let data = self.tab_data.get(&current_tab_index).expect("No data found for tab 0");
-        let data = data.split('\n');
-        data.count()
+        let data = self.tabs[self.current_tab_index].text.split('\n');
+        data.clone().count()
     }
 
     fn render_note(&self, area: Rect, buf: &mut Buffer) {
-        let side_layout = Layout::default()
+        let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                    Constraint::Max(2),
-                    Constraint::Fill(1),
-                ]
-            )
+                Constraint::Max(3), // top 2 lines for title block
+                Constraint::Fill(1),
+            ])
             .split(area);
 
-        let tab_title = self.current_screen.to_string();
-        Line::from(tab_title)
-            .yellow()
-            .render(side_layout[0], buf);
-        
-        // list rendering
-        let list_items = vec![
-            "info",
-            "notes",
-            "export",
-        ];
-        let list_items: Vec<ListItem> = list_items
-            .into_iter()
-            .map(|item| ListItem::new(
-                Line::from(item)
-            ))
-            .collect();
+        let text = self.tabs[self.current_tab_index].text.clone();
+        let cursor_pos = self.cursor_pos;
 
-        // render list inside the block
-        Widget::render(&List::new(list_items), side_layout[1], buf);
+        let block = Block::new()
+            .title(Line::raw(self.tabs[self.current_tab_index].tab_name.clone()).bold().cyan());
+        block.render(layout[0], buf);
+
+        TextInput::new(&text, cursor_pos)
+            .render(layout[1], buf);
     }
 
     // renders popup area
@@ -174,24 +161,12 @@ impl App {
         paragraph.render(popup_area, buf);
     }
 
-    //             \n\nOPEN FILE
-    // [3] Styled HTML - Opens .html file with default styles in browser
-    // [4] Plain HTML - Opens .html file with minimal styling in file explorer. This file can then be modified with custom styles.
-
-
     fn popup_area(area: Rect, percent_x: u16, percent_y: u16) -> Rect {
         let vertical = Layout::vertical([Constraint::Percentage(percent_y)]).flex(Flex::Center);
         let horizontal = Layout::horizontal([Constraint::Percentage(percent_x)]).flex(Flex::Center);
         let [area] = vertical.areas(area);
         let [area] = horizontal.areas(area);
         area
-    }
-}
-
-impl CurrentScreen {
-    fn title(self) -> Line<'static> {
-        format!(" {self} ")
-            .into()
     }
 
     fn render_main_tab(self, area: Rect, buf: &mut Buffer) {
@@ -236,14 +211,5 @@ impl CurrentScreen {
 
         // render list inside the block
         Widget::render(&List::new(list_items), main_layout[1], buf);
-    }
-    
-    fn render_tab(self, app: &App, area: Rect, buf: &mut Buffer) {
-        let current_tab_index = app.current_screen as usize;
-        let text = app.tab_data.get(&current_tab_index).expect("No text found for tab 0");
-        let cursor_pos = app.cursor_pos;
-
-        TextInput::new(text, cursor_pos)
-            .render(area, buf);
     }
 }

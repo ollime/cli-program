@@ -11,7 +11,7 @@ pub struct Export {
 }
 
 impl Export {
-    pub fn export_as_styled_html(input_value: &str, file_name: String) -> io::Result<()> {
+    pub fn export_as_styled_html(input_value: String, file_name: String) -> io::Result<()> {
     let css_styles: String = 
     String::from("html {
             background-color: black;
@@ -55,12 +55,12 @@ impl Export {
         Export::export_as_html(input_value, file_name, css_styles)
     }
 
-    pub fn export_as_plain_html(input_value: &str, file_name: String) -> io::Result<()> {
+    pub fn export_as_plain_html(input_value: String, file_name: String) -> io::Result<()> {
         let css_styles = String::from("");
         Export::export_as_html(input_value, file_name, css_styles)
     }
 
-    pub fn export_as_text(input_value: &str, file_name: String) -> io::Result<()> {
+    pub fn export_as_text(input_value: String, file_name: String) -> io::Result<()> {
         let path: String = format!("data/{}.txt", file_name);
         let path = Path::new(&path);
         let display = path.display();
@@ -80,7 +80,7 @@ impl Export {
         Ok(())
     }
 
-    fn export_as_html(input_value: &str, file_name: String, css_styles: String) -> io::Result<()> {
+    fn export_as_html(input_value: String, file_name: String, css_styles: String) -> io::Result<()> {
         let path: String = format!("data/{}.html", file_name);
         let path = Path::new(&path);
         let display = path.display();
@@ -125,7 +125,7 @@ impl Export {
         };
     }
 
-    fn format_html(file_name: &str, input_value: &str, css_styles: String) -> String {
+    fn format_html(file_name: &str, input_value: String, css_styles: String) -> String {
         let split_text: Vec<&str> = input_value.split('\n').collect();
         let text_content: Vec<_> = split_text
             .clone()
