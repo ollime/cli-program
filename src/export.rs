@@ -135,7 +135,7 @@ impl Export {
                 if line.len() > 0 {
                     if line.starts_with("* ") {
                         // parses list items
-                        if (index != 0 && index == split_text.len()) {
+                        if index != 0 && index == split_text.len() {
                             if !split_text[index - 1].starts_with("* ") {
                                 format!("\t\t\t<ul><li>{}</li>", line.strip_prefix("* ").unwrap())
                             }

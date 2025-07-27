@@ -6,6 +6,10 @@ use strum::IntoEnumIterator;
 use std::collections::HashMap;
 
 use crate::export::Export;
+pub struct Tab {
+    pub tab_name: String,
+    pub text: String
+}
 
 #[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
 pub enum CurrentScreen {
@@ -27,7 +31,9 @@ pub struct App {
     running: bool,
     pub current_screen: CurrentScreen,
     pub can_edit: bool,
+    pub current_tab_index: usize,
     pub tab_data: HashMap<usize, String>,
+    pub tabs: Vec<Tab>,
     pub cursor_pos: usize,
     pub show_popup: bool,
 }
@@ -39,7 +45,12 @@ impl App {
             running: true,
             current_screen: CurrentScreen::Main,
             can_edit: true,
+            current_tab_index: 0,
             tab_data: HashMap::new(),
+            tabs: vec![Tab {
+                tab_name: String::from("dfklsdf"),
+                text: String::from("strdsfjlsd")
+            }],
             cursor_pos: 0,
             show_popup: false,
         }
@@ -130,8 +141,7 @@ impl App {
             (_, KeyCode::Char('0')) => {
                 if self.show_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
-                        let current_tab_index = self.current_screen as usize;
-                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
                         let _ = Export::export_as_styled_html(current_tab_data, self.current_screen.to_string());
                         self.show_popup = false; // close popup
                     }
@@ -143,8 +153,7 @@ impl App {
             (_, KeyCode::Char('1')) => {
                 if self.show_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
-                        let current_tab_index = self.current_screen as usize;
-                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
                         let _ = Export::export_as_plain_html(current_tab_data, self.current_screen.to_string());
                         self.show_popup = false; // close popup
                     }
@@ -155,8 +164,7 @@ impl App {
             }(_, KeyCode::Char('2')) => {
                 if self.show_popup { // confirm popup and save data
                     if self.current_screen.to_string() != "Main" {
-                        let current_tab_index = self.current_screen as usize;
-                        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                        let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
                         let _ = Export::export_as_text(current_tab_data, self.current_screen.to_string());
                         self.show_popup = false; // close popup
                     }
@@ -167,8 +175,7 @@ impl App {
             }
 
             (KeyModifiers::CONTROL, KeyCode::Char('o')) => {
-                let current_tab_index = self.current_screen as usize;
-                let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+                let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
                 Export::open_in_file_explorer();
                 self.show_popup = false
             }
@@ -204,12 +211,22 @@ impl App {
     }
 
     pub fn next_tab(&mut self) {
-        self.current_screen = self.current_screen.next();
+        self.current_tab_index = self.current_tab_index + 1;
+        
+        if (self.current_tab_index == self.tabs.len()) {
+            self.tabs.push(Tab {
+                tab_name: format!("Tab {}", self.tabs.len() + 1),
+                text: String::from("")
+            });
+        }
+        
         self.cursor_pos = 0; // reset cursor position
     }
 
     pub fn previous_tab(&mut self) {
-        self.current_screen = self.current_screen.previous();
+        if self.current_tab_index > 0 {
+            self.current_tab_index = self.current_tab_index - 1;
+        }
         self.cursor_pos = 0; // reset cursor position
     }
 
@@ -219,8 +236,7 @@ impl App {
         // then find num of characters between cursor_pos and \n
         // add that num to cursor_pos
 
-        let current_tab_index = self.current_screen as usize;
-        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+        let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
         let str_slice = &current_tab_data[self.cursor_pos..]; // string after cursor_pos
 
         if let Some(newline_index) = str_slice.find('\n') {
@@ -242,8 +258,7 @@ impl App {
         // then find num of characters between cursor_pos and \n
         // add that num to cursor_pos
         
-        let current_tab_index = self.current_screen as usize;
-        let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+        let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
         let str_slice = &current_tab_data[..self.cursor_pos]; // string before cursor_pos
         
         if let Some(newline_index) = str_slice.rfind('\n') {
@@ -254,10 +269,9 @@ impl App {
 
     fn insert_char(&mut self, value: char) {
         if self.can_edit {
-            let current_tab_index = self.current_screen as usize;
             // cannot be first index (main tab)
-            if current_tab_index > 0 {
-                let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+            if self.current_tab_index > 0 {
+                let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
                 let mut new_content = current_tab_data.clone();
 
                 // returns cursor_pos or new length depending on which one is smaller
@@ -266,7 +280,7 @@ impl App {
                 let cursor = self.cursor_pos.min(new_content.len());
 
                 new_content.insert(cursor, value);
-                self.tab_data.insert(current_tab_index, new_content);
+                self.tab_data.insert(self.current_tab_index, new_content);
                 self.cursor_pos = cursor + 1;
             }
         }
@@ -274,8 +288,7 @@ impl App {
 
     fn delete_char(&mut self) {
         if self.can_edit {
-            let current_tab_index = self.current_screen as usize;
-            let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+            let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
 
             if current_tab_data.len() > 0 { // cannot delete if there is no text
                 let mut new_content = current_tab_data.clone();
@@ -293,7 +306,7 @@ impl App {
                 }
 
                 self.tab_data.insert(
-                    current_tab_index,
+                    self.current_tab_index,
                     new_content
                 );
             }
@@ -302,13 +315,12 @@ impl App {
 
     fn insert_newline(&mut self) {
         if self.can_edit {
-            let current_tab_index = self.current_screen as usize;
-            let current_tab_data = self.tab_data.get(&current_tab_index).unwrap();
+            let current_tab_data = self.tab_data.get(&self.current_tab_index).unwrap();
             let mut new_content = current_tab_data.clone();
             
             let cursor = self.cursor_pos.min(new_content.len());
             new_content.insert(cursor, '\n');
-            self.tab_data.insert(current_tab_index, new_content);
+            self.tab_data.insert(self.current_tab_index, new_content);
             self.cursor_pos = cursor + 1;
         }
     }

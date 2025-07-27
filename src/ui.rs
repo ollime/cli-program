@@ -2,9 +2,13 @@ use ratatui::{
     style::{Stylize, Color},
     text::{Line, Span},
     widgets::{Widget, Block, Paragraph, Padding, Tabs,
-        List, ListItem, Borders, Clear, Wrap},
+        List, ListItem, ListState, Borders, Clear, Wrap,
+        HighlightSpacing},
     buffer::Buffer,
     layout::{Rect, Flex},
+    style::{
+        palette::tailwind::{BLUE, GREEN, SLATE}
+    }
 };
 use strum::IntoEnumIterator;
 use ratatui::prelude::*;
@@ -25,66 +29,91 @@ impl Widget for &App {
         let title_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Max(2), // top 2 lines for title block
+                Constraint::Max(3), // top 2 lines for title block
                 Constraint::Fill(1),
             ])
             .split(area);
+
         self.render_title(title_layout[0], buf);
+        self.render_tab_list(title_layout[1], buf); // render tab titles
 
-        let content_layout = Layout::default()
-                .direction(Direction::Horizontal)
-                .constraints(vec![
-                    Constraint::Percentage(25),
-                    Constraint::Percentage(75)
-                ])
-                .split(title_layout[1]);
 
-        // render left_block contents
-        let left_block = Block::bordered();
-        let left_block_area = left_block.inner(content_layout[0]); // grab the area inside the block
-        left_block.render(content_layout[0], buf); // render block ui
-        self.render_side_bar(left_block_area, buf);
+        // let content_layout = Layout::default()
+        //         .direction(Direction::Horizontal)
+        //         .constraints(vec![
+        //             Constraint::Percentage(25),
+        //             Constraint::Percentage(75)
+        //         ])
+        //         .split(title_layout[1]);
+
+        // // render left_block contents
+        // let left_block = Block::bordered();
+        // let left_block_area = left_block.inner(content_layout[0]); // grab the area inside the block
+        // left_block.render(content_layout[0], buf); // render block ui
+        // self.render_side_bar(left_block_area, buf);
         
-        // render right_block contents
-        let right_block = Block::bordered(); // block ui
-        let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
-        right_block.render(content_layout[1], buf); // render block ui
+        // // render right_block contents
+        // let right_block = Block::bordered(); // block ui
+        // let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
+        // right_block.render(content_layout[1], buf); // render block ui
 
-        let right_layout = Layout::default()
-                .direction(Direction::Vertical)
-                .constraints(vec![
-                    Constraint::Max(2),
-                    Constraint::Fill(1)
-                ])
-                .split(right_block_area);
+        // let right_layout = Layout::default()
+        //         .direction(Direction::Vertical)
+        //         .constraints(vec![
+        //             Constraint::Max(2),
+        //             Constraint::Fill(1)
+        //         ])
+        //         .split(right_block_area);
 
-        // render tabs
-        self.render_tabs(right_layout[0], buf); // render tab titles
-        match self.current_screen { // render tab content
-            CurrentScreen::Main => self.current_screen.render_main_tab(right_layout[1], buf),
-            CurrentScreen::Tab1 => self.current_screen.render_tab(self, right_layout[1], buf),
-            CurrentScreen::Tab2 => self.current_screen.render_tab(self, right_layout[1], buf),
-            CurrentScreen::Tab3 => self.current_screen.render_tab(self, right_layout[1], buf),
-        }
+        // // render tabs
+        // self.render_tabs(right_layout[0], buf); // render tab titles
+        // match self.current_screen { // render tab content
+        //     CurrentScreen::Main => self.current_screen.render_main_tab(right_layout[1], buf),
+        //     CurrentScreen::Tab1 => self.current_screen.render_tab(self, right_layout[1], buf),
+        //     CurrentScreen::Tab2 => self.current_screen.render_tab(self, right_layout[1], buf),
+        //     CurrentScreen::Tab3 => self.current_screen.render_tab(self, right_layout[1], buf),
+        // }
 
-        // render popup
-        if self.show_popup {
-            self.render_export_popup(right_layout[1], buf);
-        }
+        // // render popup
+        // if self.show_popup {
+        //     self.render_export_popup(right_layout[1], buf);
+        // }
     }
 }
 
 impl App {
-    fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
-        let tabs_block = Block::bordered()
-            .borders(Borders::BOTTOM);
-        let tab_titles = CurrentScreen::iter().map(CurrentScreen::title);
-        let current_screen_index = self.current_screen as usize;
-        Tabs::new(tab_titles)
-            .block(tabs_block)
-            .select(current_screen_index) // sets tab index
-            .divider(" ")
-            .render(area, buf);
+    fn render_tab_list(&self, area: Rect, buf: &mut Buffer) {
+        const TODO_HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(Color::Cyan);
+        const NORMAL_ROW_BG: Color = SLATE.c950;
+        const ALT_ROW_BG_COLOR: Color = SLATE.c900;
+        const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
+        const TEXT_FG_COLOR: Color = SLATE.c200;
+        const COMPLETED_TEXT_FG_COLOR: Color = GREEN.c500;
+       let block = Block::new()
+            .title(Line::raw("Use [ and ] to navigate tabs.").centered())
+            .borders(Borders::TOP)
+            .border_set(symbols::border::EMPTY)
+            .border_style(TODO_HEADER_STYLE)
+            .bg(NORMAL_ROW_BG);
+
+        let tabs = &self.tabs;
+        let current_screen_index = self.current_tab_index;
+        let items: Vec<ListItem> = self.tabs
+            .iter()
+            .map(|tab| ListItem::new(tab.tab_name.clone()))
+            .collect();
+
+        let mut state = ListState::default();
+        state.select(Some(self.current_tab_index));
+
+        // render the list
+        let tabs_widget = List::new(items)
+            .block(block)
+            .highlight_style(SELECTED_STYLE)
+            .highlight_symbol(">")
+            .highlight_spacing(HighlightSpacing::Always);
+
+        ratatui::prelude::StatefulWidget::render(tabs_widget, area, buf, &mut state);
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
@@ -94,7 +123,7 @@ impl App {
             .centered();
         let title_block = Block::bordered()
             .title(title)
-            .borders(Borders::TOP)
+            .borders(Borders::TOP | Borders::BOTTOM)
             .padding(Padding::horizontal(1));
         let title_block_area = title_block.inner(area);
         title_block.render(area, buf);
