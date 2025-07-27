@@ -31,6 +31,7 @@ pub struct App {
     running: bool,
     pub current_screen: CurrentScreen,
     pub can_edit: bool,
+    pub can_select_tab: bool,
     pub current_tab_index: usize,
     pub tab_data: HashMap<usize, String>,
     pub tabs: Vec<Tab>,
@@ -44,7 +45,8 @@ impl App {
         Self {
             running: true,
             current_screen: CurrentScreen::Main,
-            can_edit: true,
+            can_edit: false,
+            can_select_tab: true,
             current_tab_index: 0,
             tab_data: HashMap::new(),
             tabs: vec![Tab {
@@ -103,8 +105,21 @@ impl App {
             }
 
             // Switching current screen
-            (_, KeyCode::Char('[')) => self.previous_tab(),
-            (_, KeyCode::Char(']')) => self.next_tab(),
+            (_, KeyCode::Char('[')) => {
+                if (self.can_select_tab) {
+                    self.previous_tab()
+                }
+            },
+            (_, KeyCode::Char(']')) => {
+                if (self.can_select_tab) {
+                    self.next_tab()
+                }
+            },
+            (_, KeyCode::Char(' ')) => {
+                if (self.can_select_tab) {
+                    self.can_select_tab = false;
+                }
+            },
             
             // Horizontal arrows can be used to either switch tab or move cursor (when in edit mode)
             (_, KeyCode::Left) => {

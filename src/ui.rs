@@ -35,49 +35,13 @@ impl Widget for &App {
             .split(area);
 
         self.render_title(title_layout[0], buf);
-        self.render_tab_list(title_layout[1], buf); // render tab titles
 
-
-        // let content_layout = Layout::default()
-        //         .direction(Direction::Horizontal)
-        //         .constraints(vec![
-        //             Constraint::Percentage(25),
-        //             Constraint::Percentage(75)
-        //         ])
-        //         .split(title_layout[1]);
-
-        // // render left_block contents
-        // let left_block = Block::bordered();
-        // let left_block_area = left_block.inner(content_layout[0]); // grab the area inside the block
-        // left_block.render(content_layout[0], buf); // render block ui
-        // self.render_side_bar(left_block_area, buf);
-        
-        // // render right_block contents
-        // let right_block = Block::bordered(); // block ui
-        // let right_block_area = right_block.inner(content_layout[1]); // grab the area inside the block
-        // right_block.render(content_layout[1], buf); // render block ui
-
-        // let right_layout = Layout::default()
-        //         .direction(Direction::Vertical)
-        //         .constraints(vec![
-        //             Constraint::Max(2),
-        //             Constraint::Fill(1)
-        //         ])
-        //         .split(right_block_area);
-
-        // // render tabs
-        // self.render_tabs(right_layout[0], buf); // render tab titles
-        // match self.current_screen { // render tab content
-        //     CurrentScreen::Main => self.current_screen.render_main_tab(right_layout[1], buf),
-        //     CurrentScreen::Tab1 => self.current_screen.render_tab(self, right_layout[1], buf),
-        //     CurrentScreen::Tab2 => self.current_screen.render_tab(self, right_layout[1], buf),
-        //     CurrentScreen::Tab3 => self.current_screen.render_tab(self, right_layout[1], buf),
-        // }
-
-        // // render popup
-        // if self.show_popup {
-        //     self.render_export_popup(right_layout[1], buf);
-        // }
+        if (self.can_select_tab) {
+            self.render_tab_list(title_layout[1], buf); // render tab titles
+        }
+        else {
+            self.render_note(title_layout[1], buf); // render a specific note
+        }
     }
 }
 
@@ -160,7 +124,7 @@ impl App {
         data.count()
     }
 
-    fn render_side_bar(&self, area: Rect, buf: &mut Buffer) {
+    fn render_note(&self, area: Rect, buf: &mut Buffer) {
         let side_layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
