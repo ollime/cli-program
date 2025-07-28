@@ -52,6 +52,7 @@ impl<'a> Widget for TextInput<'a> {
         }
         Paragraph::new(lines)
             .wrap(Wrap {trim: true})
+            .style(Style::default().bg(Color::Black))
             .render(area, buf);
     }
 }

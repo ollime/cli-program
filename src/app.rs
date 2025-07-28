@@ -1,9 +1,7 @@
 use color_eyre::Result;
 use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use strum_macros::{Display, EnumIter, FromRepr};
-use strum::IntoEnumIterator;
-use std::collections::HashMap;
+use scraper::{Html, Selector};
 
 use crate::export::Export;
 pub struct Tab {
@@ -11,25 +9,11 @@ pub struct Tab {
     pub text: String
 }
 
-#[derive(Default, Clone, Copy, Display, FromRepr, EnumIter)]
-pub enum CurrentScreen {
-    #[default]
-    #[strum(to_string = "Main")]
-    Main,
-    #[strum(to_string = "Tab 1")]
-    Tab1,
-    #[strum(to_string = "Tab 2")]
-    Tab2,
-    #[strum(to_string = "Tab 3")]
-    Tab3,
-}
-
 /// The main application which holds the state and logic of the application.
 // #[derive(Debug, Default)]
 pub struct App {
     /// Is the application running?
     running: bool,
-    pub current_screen: CurrentScreen,
     pub can_edit: bool,
     pub can_select_tab: bool,
     pub current_tab_index: usize,
@@ -43,7 +27,6 @@ impl App {
     pub fn new() -> Self {
         Self {
             running: true,
-            current_screen: CurrentScreen::Main,
             can_edit: false,
             can_select_tab: true,
             current_tab_index: 0,
@@ -59,14 +42,42 @@ impl App {
     /// Run the application's main loop.
     pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         self.running = true;
+        let data: Vec<(String, String)> = Export::import_html().unwrap();
+        
+        pub fn parse_html(text: &str) -> String {
+            let split_text = text.split("<p>");
+            let mut final_text = String::from("");
 
-        // // initialize hashmap data
-        // CurrentScreen::iter().for_each(|tab_index| {
-        //     self.tab_data.insert(
-        //         tab_index as usize,
-        //         String::from("")
-        //     );
-        // });
+            for paragraph in split_text {
+                let remove_p = String::from(paragraph
+                .replace("<p>", "")
+                .replace("</p>", "\n")
+                .trim());
+
+                let fragment = Html::parse_fragment(&remove_p);
+                let select_li = Selector::parse("li").unwrap();    
+                for element in fragment.select(&select_li) {
+                    let text = &element.text().collect::<String>();
+                    final_text = final_text + "* " + text + "\n";
+                }
+            }
+
+            final_text
+        }
+
+        for i in data {
+            self.tabs.push(Tab {
+                tab_name: format!("{}",
+                    i.0
+                    .strip_suffix(".html")
+                    .or_else(|| i.0.strip_suffix(".txt"))
+                    .unwrap_or(&i.0)
+                ),
+                text: format!("{}", parse_html(&i.1)),
+            });
+        }
+
+        
 
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
@@ -96,11 +107,12 @@ impl App {
             // Exits the program
             (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => {
-                if (self.can_select_tab) {
+                if self.can_select_tab {
                     self.quit()
                 }
                 else {
                     self.can_select_tab = true;
+                    self.can_edit = false;
                 }
             },
             (_, KeyCode::Char('q')) => {
@@ -171,11 +183,10 @@ impl App {
             // Export/save
             (_, KeyCode::Char('0')) => {
                 if self.show_popup { // confirm popup and save data
-                    if self.current_screen.to_string() != "Main" {
-                        let current_tab_data = self.tabs[self.current_tab_index].text.clone();
-                        let _ = Export::export_as_styled_html(current_tab_data, self.current_screen.to_string());
-                        self.show_popup = false; // close popup
-                    }
+                    let current_tab_data = self.tabs[self.current_tab_index].text.clone();
+                    let current_tab_name = self.tabs[self.current_tab_index].tab_name.clone();
+                    let _ = Export::export_as_styled_html(current_tab_data, current_tab_name);
+                    self.show_popup = false; // close popup
                 }
                 else {
                     self.insert_char('0');
@@ -183,22 +194,20 @@ impl App {
             }
             (_, KeyCode::Char('1')) => {
                 if self.show_popup { // confirm popup and save data
-                    if self.current_screen.to_string() != "Main" {
-                        let current_tab_data = self.tabs[self.current_tab_index].text.clone();
-                        let _ = Export::export_as_plain_html(current_tab_data, self.current_screen.to_string());
-                        self.show_popup = false; // close popup
-                    }
+                    let current_tab_data = self.tabs[self.current_tab_index].text.clone();
+                    let current_tab_name = self.tabs[self.current_tab_index].tab_name.clone();
+                    let _ = Export::export_as_plain_html(current_tab_data, current_tab_name);
+                    self.show_popup = false; // close popup
                 }
                 else {
                     self.insert_char('1');
                 }
             }(_, KeyCode::Char('2')) => {
                 if self.show_popup { // confirm popup and save data
-                    if self.current_screen.to_string() != "Main" {
-                        let current_tab_data = self.tabs[self.current_tab_index].text.clone();
-                        let _ = Export::export_as_text(current_tab_data, self.current_screen.to_string());
-                        self.show_popup = false; // close popup
-                    }
+                    let current_tab_data = self.tabs[self.current_tab_index].text.clone();
+                    let current_tab_name = self.tabs[self.current_tab_index].tab_name.clone();
+                    let _ = Export::export_as_text(current_tab_data, current_tab_name);
+                    self.show_popup = false; // close popup
                 }
                 else {
                     self.insert_char('2');
@@ -206,7 +215,6 @@ impl App {
             }
 
             (KeyModifiers::CONTROL, KeyCode::Char('o')) => {
-                let current_tab_data = self.tabs[self.current_tab_index].text.clone();
                 Export::open_in_file_explorer();
                 self.show_popup = false
             }
@@ -300,23 +308,20 @@ impl App {
 
     fn insert_char(&mut self, value: char) {
         if self.can_edit {
-            // cannot be first index (main tab)
-            if self.current_tab_index >= 0 {
-                let current_tab_data = self.tabs[self.current_tab_index].text.clone();
-                let mut new_content = current_tab_data.clone();
+            let current_tab_data = self.tabs[self.current_tab_index].text.clone();
+            let mut new_content = current_tab_data.clone();
 
-                // returns cursor_pos or new length depending on which one is smaller
-                // if cursor_pos is smaller, places at location in text
-                // if length is smaller, then places cursor at end of text
-                let cursor = self.cursor_pos.min(new_content.len());
+            // returns cursor_pos or new length depending on which one is smaller
+            // if cursor_pos is smaller, places at location in text
+            // if length is smaller, then places cursor at end of text
+            let cursor = self.cursor_pos.min(new_content.len());
 
-                new_content.insert(cursor, value);
-                if let Some(tab) = self.tabs.get_mut(self.current_tab_index) {
-                    tab.text = new_content;
-                }
-
-                self.cursor_pos = cursor + 1;
+            new_content.insert(cursor, value);
+            if let Some(tab) = self.tabs.get_mut(self.current_tab_index) {
+                tab.text = new_content;
             }
+
+            self.cursor_pos = cursor + 1;
         }
     }
 
@@ -358,19 +363,5 @@ impl App {
             }
             self.cursor_pos = cursor + 1;
         }
-    }
-}
-
-impl CurrentScreen {
-    fn previous(self) -> Self {
-        let current_index: usize = self as usize;
-        let previous_index = current_index.saturating_sub(1);
-        Self::from_repr(previous_index).unwrap_or(self)
-    }
-
-    fn next(self) -> Self {
-        let current_index = self as usize;
-        let next_index = current_index.saturating_add(1);
-        Self::from_repr(next_index).unwrap_or(self)
     }
 }

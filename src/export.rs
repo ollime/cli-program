@@ -5,6 +5,7 @@ use std::io;
 use std::io::Write;
 use std::fs;
 use std::process::Command;
+use std::io::Read;
 
 pub struct Export {
     
@@ -197,16 +198,23 @@ impl Export {
         html_text
     }
 
-    fn _copy_as_html() {
-        // let mut file = match File::open(&path) {
-        //     Err(why) => panic!("couldn't open {}: {}", display, why),
-        //     Ok(file) => file,
-        // };
-    
-        // let mut s = String::new();
-        // match file.read_to_string(&mut s) {
-        //     Err(why) => panic!("couldn't read {}: {}", display, why),
-        //     Ok(_) => print!("{} contains:\n{}", display, s),
-        // }
+    pub fn import_html() -> io::Result<Vec<(String, String)>> {
+        let path: &Path = Path::new("data");
+        let mut data = Vec::new();
+
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            let path = entry.path();
+
+            let mut file = fs::File::open(&path)?;
+            let mut contents = String::new();
+            file.read_to_string(&mut contents)?;
+
+            if let Some(filename) = path.file_name().and_then(|f| f.to_str()) {
+                data.push((filename.to_string(), contents));
+            }
+        }
+
+        Ok(data)
     }
 }

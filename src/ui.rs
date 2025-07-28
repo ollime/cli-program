@@ -1,21 +1,19 @@
 use ratatui::{
     style::{Stylize, Color},
     text::{Line, Span},
-    widgets::{Widget, Block, Paragraph, Padding, Tabs,
+    widgets::{Widget, Block, Paragraph, Padding,
         List, ListItem, ListState, Borders, Clear, Wrap,
         HighlightSpacing},
     buffer::Buffer,
     layout::{Rect, Flex},
     style::{
-        palette::tailwind::{SLATE, GREEN}
+        palette::tailwind::{SLATE}
     }
 };
-use strum::IntoEnumIterator;
 use ratatui::prelude::*;
 use std::collections::BTreeMap;
 
 use crate::app::App;
-use crate::app::CurrentScreen;
 use crate::text_input::TextInput;
 
 impl Widget for &App {
@@ -106,8 +104,6 @@ impl App {
             .border_style(TODO_HEADER_STYLE)
             .bg(NORMAL_ROW_BG);
 
-        let tabs = &self.tabs;
-        let current_screen_index = self.current_tab_index;
         let items: Vec<ListItem> = self.tabs
             .iter()
             .map(|tab| ListItem::new(tab.tab_name.clone()))
@@ -128,7 +124,7 @@ impl App {
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from("TUI program title")
+        let title = Line::from("Note")
             .bold()
             .cyan()
             .centered();
@@ -141,7 +137,7 @@ impl App {
 
         let text_display = Line::from(
             vec![
-                Span::from("edit mode: "),
+                Span::from("edit: "),
                 Span::from(format!("{}", match self.can_edit {
                     true => "on",
                     false => "off"
@@ -150,7 +146,7 @@ impl App {
                     false => Color::Red,
                 }),
                 "  -  ".white(),
-                Span::from(format!("line: {}", self.get_line_count())),
+                Span::from(format!("lines: {}", self.get_line_count())),
                 "  -  ".white(),
                 Span::from(format!("character count: {}", self.get_character_count()))
             ]
@@ -159,13 +155,11 @@ impl App {
     }
 
     pub fn get_character_count(&self) -> usize {
-        let current_tab_index = self.current_screen as usize;
         let data = &self.tabs[self.current_tab_index].text;
         data.len()
     }
 
     pub fn get_line_count(&self) -> usize {
-        let current_tab_index = self.current_screen as usize;
         let data = self.tabs[self.current_tab_index].text.split('\n');
         data.clone().count()
     }
@@ -174,7 +168,7 @@ impl App {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Max(3), // top 2 lines for title block
+                Constraint::Max(2), // top 2 lines for title block
                 Constraint::Fill(1),
                 Constraint::Max(1)
             ])
@@ -184,11 +178,12 @@ impl App {
         let cursor_pos = self.cursor_pos;
 
         let block = Block::new()
-            .title(Line::raw(self.tabs[self.current_tab_index].tab_name.clone()).bold().cyan());
+            .title(Line::raw(self.tabs[self.current_tab_index].tab_name.clone()).bold().cyan())
+            .style(Style::default().bg(Color::Black));
         block.render(layout[0], buf);
         
         TextInput::new(&text, cursor_pos)
-        .render(layout[1], buf);
+            .render(layout[1], buf);
 
         let text = "Press esc or CTRL + C to return to notes list";
         Line::from(text)
@@ -203,7 +198,6 @@ impl App {
     \n\n[0] Styled HTML - Export as styled .html
     [1] Plain HTML - Export as .html with minimal styling
     [2] Text - Exports as .txt
-    [3] Markdown - Exports as .md
 
     [Q] - Close prompt
             \n\nTo open a file, use the Ctrl + O command.")
