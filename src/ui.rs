@@ -1,17 +1,7 @@
 use ratatui::{
-    style::{Stylize, Color},
-    text::{Line, Span},
-    widgets::{Widget, Block, Paragraph, Padding,
-        List, ListItem, ListState, Borders, Clear, Wrap,
-        HighlightSpacing},
-    buffer::Buffer,
-    layout::{Rect, Flex},
-    style::{
-        palette::tailwind::{SLATE}
-    }
+    buffer::Buffer, layout::{Flex, Rect}, style::{palette::{material::CYAN, tailwind::SLATE}, Color, Stylize}, text::{Line, Span}, widgets::{Block, Borders, Clear, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph, Widget, Wrap}
 };
 use ratatui::prelude::*;
-use std::collections::BTreeMap;
 
 use crate::app::App;
 use crate::text_input::TextInput;
@@ -49,47 +39,11 @@ impl Widget for &App {
 }
 
 impl App {
-    fn render_commands_info(&self, area: Rect, buf: &mut Buffer) {
-        // // render text
-        // let text = "Commands\n* if edit mode is off\n";
-        // Paragraph::new(text)
-        //     .render(area, buf);
-
-        // list rendering
-        let list_items: BTreeMap<&str, &str> = BTreeMap::from([
-            ("", "Commands"),
-            ("[ ]", "Switch tab"),
-            ("* Left/Right", "Switch tab"),
-            ("* Up/Down", "Switch sidebar options"),
-            ("Ctrl + E", "Change edit mode"),
-            ("Ctrl + S", "Export/save"),
-            ("Ctrl + O", "Open HTML file")
-        ]);
-
-        let list_items: Vec<ListItem> = list_items
-            .into_iter()
-            .map(|item| ListItem::new(
-                Line::from(
-                    vec![
-                        match item.0.contains("*") {
-                            true => item.0.magenta().bold(),
-                            false => item.0.yellow().bold(), // using Stylize syntax
-                        },
-                        " ".into(),
-                        item.1.into()
-                    ]
-                )
-            ))
-            .collect();
-
-        Widget::render(&List::new(list_items), area, buf);
-    }
-
     fn render_tab_list(&self, area: Rect, buf: &mut Buffer) {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints(vec![
-                Constraint::Max(8), // top 2 lines for title block
+                Constraint::Max(1), // top 3 lines for commands info
                 Constraint::Fill(1),
             ])
             .split(area);
@@ -120,7 +74,12 @@ impl App {
             .highlight_spacing(HighlightSpacing::Always);
         ratatui::prelude::StatefulWidget::render(tabs_widget, layout[1], buf, &mut state);
 
-        self.render_commands_info(layout[0], buf); // render tab titles
+        let command_info = Line::from("\nPress Spacebar to open note")
+            .bold()
+            .white()
+            .bg(Color::Cyan)
+            .centered();
+        command_info.render(layout[0], buf); // render tab titles
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {

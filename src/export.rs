@@ -128,38 +128,67 @@ impl Export {
 
     fn format_html(file_name: &str, input_value: String, css_styles: String) -> String {
         let split_text: Vec<&str> = input_value.split('\n').collect();
-        let text_content: Vec<_> = split_text
-            .clone()
-            .into_iter()
-            .enumerate()
-            .map(|(index, line)| {
-                if line.len() > 0 {
-                    if line.starts_with("* ") {
-                        // parses list items
-                        if index != 0 && index == split_text.len() {
-                            if !split_text[index - 1].starts_with("* ") {
-                                format!("\t\t\t<ul><li>{}</li>", line.strip_prefix("* ").unwrap())
-                            }
-                            else if !split_text[index + 1].starts_with("* ") {
-                                format!("\t\t\t<li>{}</li></ul>", line.strip_prefix("* ").unwrap())
-                            }
-                            else {
-                                format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
-                            };
-                        }
-                        format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
-                    }
-                    else {
-                        // paragraph html element
-                        format!("\t\t\t<p>{}</p>", line)
-                    }
+        let mut in_list = false;
+        let mut text_content: Vec<String> = Vec::new();
+
+        for (index, line) in split_text.iter().enumerate() {
+            let trimmed = line.trim();
+
+            if trimmed.starts_with("* ") {
+                if !in_list {
+                    text_content.push("\t\t\t<ul>".to_string());
+                    in_list = true;
                 }
-                else {
-                    // blank line
-                    String::from("\t\t\t<br>")
+
+                let item = trimmed.strip_prefix("* ").unwrap();
+                text_content.push(format!("\t\t\t\t<li>{}</li>", item));
+
+                if index + 1 >= split_text.len() || !split_text[index + 1].trim().starts_with("* ") {
+                    text_content.push("\t\t\t</ul>".to_string());
+                    in_list = false;
                 }
-            })
-            .collect();
+            } else if !trimmed.is_empty() {
+                text_content.push(format!("\t\t\t<p>{}</p>", line));
+            } else {
+                // blank line
+                text_content.push(String::from("\t\t\t<br>"));
+            }
+        }
+
+
+
+        // let text_content: Vec<_> = split_text
+        //     .clone()
+        //     .into_iter()
+        //     .enumerate()
+        //     .map(|(index, line)| {
+        //         if line.len() > 0 {
+        //             if line.starts_with("* ") {
+        //                 // parses list items
+        //                 if index != 0 && index < split_text.len() - 1 {
+        //                     if !split_text[index - 1].starts_with("* ") {
+        //                         format!("\t\t\t<ul><li>{}</li>", line.strip_prefix("* ").unwrap())
+        //                     }
+        //                     else if !split_text[index + 1].starts_with("* ") {
+        //                         format!("\t\t\t<li>{}</li></ul>", line.strip_prefix("* ").unwrap())
+        //                     }
+        //                     else {
+        //                         format!("\t\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
+        //                     };
+        //                 }
+        //                 format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
+        //             }
+        //             else {
+        //                 // paragraph html element
+        //                 format!("\t\t\t<p>{}</p>", line)
+        //             }
+        //         }
+        //         else {
+        //             // blank line
+        //             String::from("\t\t\t<br>")
+        //         }
+        //     })
+        //     .collect();
         // creates a new line for html formatting purposes only
         let text_content = text_content.join("\n"); // no visual effect on page        
         

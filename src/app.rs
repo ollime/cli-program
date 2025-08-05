@@ -31,40 +31,72 @@ impl App {
             can_select_tab: true,
             current_tab_index: 0,
             tabs: vec![Tab {
-                tab_name: String::from("dfklsdf"),
-                text: String::from("strdsfjlsd")
+                tab_name: String::from("Commands"),
+                text: Self::render_commands_info(),
             }],
             cursor_pos: 0,
             show_popup: false,
         }
     }
 
+    fn render_commands_info() -> String {
+        let multiline_string = r#"
+            Commands
+            [ ]         Switch tab
+            Left/Right  Switch tab
+            Ctrl + E    Change edit mode
+            Ctrl + S    Export or save
+            Ctrl + O    Open HTML file
+            
+            Spacebar    Open note
+            q           Close popup
+            Esc         Exit program
+            Ctrl + C    Exit program
+            "#;
+        String::from(multiline_string)
+    }
+
     /// Run the application's main loop.
     pub fn run(mut self, mut terminal: DefaultTerminal) -> Result<()> {
         self.running = true;
+
         let data: Vec<(String, String)> = Export::import_html().unwrap();
-        
-        pub fn parse_html(text: &str) -> String {
-            let split_text = text.split("<p>");
+        fn parse_html(text: &str) -> String {
+            let document = Html::parse_document(&text);
+            let select = Selector::parse("div.content-container").unwrap(); 
             let mut final_text = String::from("");
 
-            for paragraph in split_text {
-                let remove_p = String::from(paragraph
-                .replace("<p>", "")
-                .replace("</p>", "\n")
-                .trim());
+            if let Some(contents) = document.select(&select).next() {
+                let text = &contents.inner_html();
+                let split_text: Vec<&str> = text.split("\n").collect();
 
-                let fragment = Html::parse_fragment(&remove_p);
-                let select_li = Selector::parse("li").unwrap();    
-                for element in fragment.select(&select_li) {
-                    let text = &element.text().collect::<String>();
-                    final_text = final_text + "* " + text + "\n";
+                for paragraph in split_text {
+                    let remove_p = paragraph
+                    .replace("<p>", "")
+                    .replace("</p>", "\n")
+                    .replace("<ul>", "\n")
+                    .replace("</ul>", "\n")
+                    .replace("<br>", "\n")
+                    .trim()
+                    .to_string();
+
+                    let fragment = Html::parse_fragment(&remove_p);
+                    let select_li = Selector::parse("li").unwrap(); 
+
+                    let elements = fragment.select(&select_li);
+                    if elements.clone().count() > 0 {
+                        for element in elements {
+                            let text = &element.text().collect::<String>();
+                            final_text += &format!("* {}\n", text);
+                        }
+                    }
+                    else {
+                        final_text += &format!("{}\n", remove_p.trim());
+                    }
                 }
             }
-
             final_text
         }
-
         for i in data {
             self.tabs.push(Tab {
                 tab_name: format!("{}",
@@ -77,7 +109,6 @@ impl App {
             });
         }
 
-        
 
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
