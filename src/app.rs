@@ -20,6 +20,7 @@ pub struct App {
     pub tabs: Vec<Tab>,
     pub cursor_pos: usize,
     pub show_popup: bool,
+    pub can_update_tab_name: bool
 }
 
 impl App {
@@ -36,6 +37,7 @@ impl App {
             }],
             cursor_pos: 0,
             show_popup: false,
+            can_update_tab_name: false
         }
     }
 
@@ -136,6 +138,7 @@ impl App {
     /// Handles the key events and updates the state of [`App`].
     fn on_key_event(&mut self, key: KeyEvent) {
         match (key.modifiers, key.code) {
+            // if Ctrl + R is active, update tab name
             // Exits the program
             (_, KeyCode::Esc)
             | (KeyModifiers::CONTROL, KeyCode::Char('c') | KeyCode::Char('C')) => {
@@ -150,7 +153,7 @@ impl App {
             (_, KeyCode::Char('q')) => {
                 if self.show_popup { self.show_popup = false }
                 else if !self.can_edit { self.quit() }
-                else {self.insert_char('q')}
+                else { self.insert_char('q') }
             }
 
             // Switching current screen
@@ -261,6 +264,11 @@ impl App {
                 self.can_edit = !self.can_edit;
             },
 
+            // rename tab
+            (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
+                self.can_update_tab_name = !self.can_update_tab_name;
+            }
+
             // editing text input
             (_, KeyCode::Char(value)) => {
                 if value == char::from('\n') {
@@ -339,7 +347,10 @@ impl App {
     }
 
     fn insert_char(&mut self, value: char) {
-        if self.can_edit {
+        if self.can_update_tab_name {
+            self.insert_tab_char(value);
+        }
+        else if self.can_edit {
             let current_tab_data = self.tabs[self.current_tab_index].text.clone();
             let mut new_content = current_tab_data.clone();
 
@@ -358,7 +369,10 @@ impl App {
     }
 
     fn delete_char(&mut self) {
-        if self.can_edit {
+        if self.can_update_tab_name {
+            self.delete_tab_char();
+        }
+        else if self.can_edit {
             let current_tab_data = self.tabs[self.current_tab_index].text.clone();
 
             if current_tab_data.len() > 0 { // cannot delete if there is no text
@@ -394,6 +408,16 @@ impl App {
                 tab.text = new_content;
             }
             self.cursor_pos = cursor + 1;
+        }
+    }
+
+    fn insert_tab_char(&mut self, value: char) {
+        self.tabs[self.current_tab_index].tab_name.push(value);
+    }
+
+    fn delete_tab_char(&mut self) {
+        if self.tabs[self.current_tab_index].tab_name.len() > 0 {
+            self.tabs[self.current_tab_index].tab_name.pop();
         }
     }
 }
