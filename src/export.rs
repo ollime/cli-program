@@ -190,6 +190,13 @@ impl Export {
     }
 
     pub fn import_html() -> io::Result<Vec<(String, String)>> {
+        let dir_path = "data";
+
+        if let Err(e) = fs::create_dir_all(dir_path) {
+            eprintln!("Failed to create directory '{}': {}", dir_path, e);
+            std::process::exit(1);
+        }
+
         let path: &Path = Path::new("data");
         let mut data = Vec::new();
 
