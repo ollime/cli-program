@@ -22,7 +22,7 @@
 
 ## Installation
 
-1. Download & run [the .exe executable](https://github.com/ollime/cli-program/notes-cli-app.exe)
+1. (on Windows) Download [the .exe file](https://github.com/ollime/cli-program/raw/main/notes-cli-app.exe). After downloading, double-click on the file in file explorer
 
 2. From source:
 
