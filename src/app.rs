@@ -47,6 +47,7 @@ impl App {
             Ctrl + E    Change edit mode
             Ctrl + S    Export or save
             Ctrl + O    Open HTML file
+            Ctrl + R    Rename tab/file
             
             Spacebar    Open note
             q           Close popup

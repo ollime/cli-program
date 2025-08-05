@@ -83,7 +83,7 @@ impl App {
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from("Note")
+        let title = Line::from("Notes CLI program")
             .bold()
             .cyan()
             .centered();

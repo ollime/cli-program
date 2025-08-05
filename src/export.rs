@@ -39,7 +39,6 @@ impl Export {
             padding: 0 10px;
         }
         .content-container {
-            line-height: 7px;
             padding: 0 10px;
         }
         h1 {
