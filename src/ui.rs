@@ -49,14 +49,12 @@ impl App {
             .split(area);
         
         const TODO_HEADER_STYLE: Style = Style::new().fg(SLATE.c100).bg(Color::Cyan);
-        const NORMAL_ROW_BG: Color = SLATE.c950;
         const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
        let block = Block::new()
             .title(Line::raw("Use [ and ] to navigate tabs.").centered())
             .borders(Borders::TOP)
             .border_set(symbols::border::EMPTY)
-            .border_style(TODO_HEADER_STYLE)
-            .bg(NORMAL_ROW_BG);
+            .border_style(TODO_HEADER_STYLE);
 
         let items: Vec<ListItem> = self.tabs
             .iter()
@@ -83,7 +81,7 @@ impl App {
     }
 
     fn render_title(&self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from("Notes CLI program")
+        let title = Line::from("skynote")
             .bold()
             .cyan()
             .centered();
@@ -107,7 +105,15 @@ impl App {
                 "  -  ".white(),
                 Span::from(format!("lines: {}", self.get_line_count())),
                 "  -  ".white(),
-                Span::from(format!("character count: {}", self.get_character_count()))
+                Span::from(format!("character count: {}", self.get_character_count())),
+                "  -  ".white(),
+                Span::from(format!("{}", match self.can_update_tab_name {
+                    true => "editing tab name",
+                    false => ""
+                })).style(match self.can_update_tab_name {
+                    true => Color::Green,
+                    false => Color::Red,
+                }),
             ]
         );
         text_display.render(title_block_area, buf);

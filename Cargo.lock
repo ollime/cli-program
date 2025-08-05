@@ -494,18 +494,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
-name = "notes-cli-app"
-version = "0.1.0"
-dependencies = [
- "color-eyre",
- "crossterm",
- "ratatui",
- "scraper",
- "strum 0.27.1",
- "strum_macros 0.27.1",
-]
-
-[[package]]
 name = "object"
 version = "0.36.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -826,6 +814,18 @@ name = "siphasher"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56199f7ddabf13fe5074ce809e7d3f42b42ae711800501b5b16ea82ad029c39d"
+
+[[package]]
+name = "skynote"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "crossterm",
+ "ratatui",
+ "scraper",
+ "strum 0.27.1",
+ "strum_macros 0.27.1",
+]
 
 [[package]]
 name = "smallvec"

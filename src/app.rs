@@ -229,6 +229,7 @@ impl App {
             // rename tab
             (KeyModifiers::CONTROL, KeyCode::Char('r')) => {
                 self.can_update_tab_name = !self.can_update_tab_name;
+                self.can_edit = !self.can_edit;
             }
 
             // editing text input

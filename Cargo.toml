@@ -1,5 +1,5 @@
 [package]
-name = "notes-cli-app"
+name = "skynote"
 version = "0.1.0"
 description = "A notes app that can export as .html or .txt files"
 license = "MIT"

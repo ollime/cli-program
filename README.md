@@ -1,8 +1,8 @@
-# Notes CLI program
+# skynote
 
 A note-taking tool that formats notes as .html or .txt files.
 Built with the ratatui Rust crate.\
-I made this to create nicely formatted notes to share with others on a personal website. 
+I made this to create nicely formatted notes to share with others on a personal website.
 
 ## Features
 
@@ -29,11 +29,12 @@ I made this to create nicely formatted notes to share with others on a personal 
 ## Installation
 
 1. On Windows:
-    * Download [the .exe file](https://github.com/ollime/cli-program/raw/main/notes-cli-app.exe). After downloading, double-click on the file in file explorer
+
+   - Download [the .exe file](https://github.com/ollime/cli-program/raw/main/skynote.exe). After downloading, double-click on the file in file explorer
 
 2. From source:
-   * ```git clone https://github.com/ollime/cli-program```
-   * To run the project: ```cargo run```
-   * To build the project: ```cargo build```
+   - `git clone https://github.com/ollime/cli-program`
+   - To run the project: `cargo run`
+   - To build the project: `cargo build`
 
 Make sure there is a `data/` folder where the project is being run.
