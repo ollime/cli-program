@@ -20,9 +20,14 @@
 | q               | Close popup          |
 | Esc, Ctrl + C   | Exit program         |
 
-## Download
+## Installation
 
-- Download the .exe file here
-- Run the .exe file in a terminal: `command`
+1. Download & run the executable from the [releases page](https://github.com/ollime/cli-program/releases)
 
-Make sure there is a `data/` folder where the .exe file is being run.
+2. From source:
+
+- `git clone https://github.com/ollime/cli-program`
+- To run the project: `cargo run`
+- To build the project: `cargo build`
+
+Make sure there is a `data/` folder where the project is being run.
