@@ -1,7 +1,8 @@
 # Notes CLI program
 
-- Multiple notes selectable from a tab system
+- Creates tabs for multiple notes
 - Export to .html (styled & plain) and .txt files
+- The user can then modify, restyle, upload, etc. the .html file as needed
 - Formats `<p>` and `<ul>` HTML elements for notes containing both paragraphs and lists
 
 <img src="assets/cli.png" alt="CLI program preview" style="height:300px;" /><img src="assets/tabs.png" alt="CLI program preview" style="height:300px;" /><img src="assets/html.png" alt="HTML result preview" style="height:300px;" />

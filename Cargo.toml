@@ -1,8 +1,7 @@
 [package]
-name = "cli-rs"
+name = "notes-cli-app"
 version = "0.1.0"
-description = "An example generated using the simple template"
-authors = ["Jennie Long <longjen100@gmail.com>"]
+description = "A notes app that can export as .html or .txt files"
 license = "MIT"
 edition = "2024"
 
