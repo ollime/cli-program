@@ -1,5 +1,11 @@
 # Notes CLI program
 
+A note-taking tool that formats notes as .html or .txt files.
+Built with the ratatui Rust crate.\
+I made this to create nicely formatted notes to share with others on a personal website. 
+
+## Features
+
 - Creates tabs for multiple notes
 - Export to .html (styled & plain) and .txt files
 - The user can then modify, restyle, upload, etc. the .html file as needed
@@ -22,12 +28,12 @@
 
 ## Installation
 
-1. (on Windows) Download [the .exe file](https://github.com/ollime/cli-program/raw/main/notes-cli-app.exe). After downloading, double-click on the file in file explorer
+1. On Windows:
+    * Download [the .exe file](https://github.com/ollime/cli-program/raw/main/notes-cli-app.exe). After downloading, double-click on the file in file explorer
 
 2. From source:
-
-- `git clone https://github.com/ollime/cli-program`
-- To run the project: `cargo run`
-- To build the project: `cargo build`
+   * ```git clone https://github.com/ollime/cli-program```
+   * To run the project: ```cargo run```
+   * To build the project: ```cargo build```
 
 Make sure there is a `data/` folder where the project is being run.
