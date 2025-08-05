@@ -1,5 +1,5 @@
 use ratatui::{
-    buffer::Buffer, layout::{Flex, Rect}, style::{palette::{material::CYAN, tailwind::SLATE}, Color, Stylize}, text::{Line, Span}, widgets::{Block, Borders, Clear, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph, Widget, Wrap}
+    buffer::Buffer, layout::{Flex, Rect}, style::{palette::{tailwind::SLATE}, Color, Stylize}, text::{Line, Span}, widgets::{Block, Borders, Clear, HighlightSpacing, List, ListItem, ListState, Padding, Paragraph, Widget, Wrap}
 };
 use ratatui::prelude::*;
 

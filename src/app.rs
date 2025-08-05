@@ -76,7 +76,7 @@ impl App {
                     .replace("</p>", "\n")
                     .replace("<ul>", "\n")
                     .replace("</ul>", "\n")
-                    .replace("<br>", "\n")
+                    .replace("<br>", "")
                     .trim()
                     .to_string();
 

@@ -3,9 +3,9 @@ use std::fs::File;
 use std::path::Path;
 use std::io;
 use std::io::Write;
+use std::io::Read;
 use std::fs;
 use std::process::Command;
-use std::io::Read;
 
 pub struct Export {
     
@@ -16,6 +16,7 @@ impl Export {
     let css_styles: String = 
     String::from("html {
             background-color: black;
+            background: linear-gradient(45deg, #66cee3, #0d2ca8);
             color: white;
             font-family: \"Cascadia Code\", monospace, Arial;
             }
@@ -149,46 +150,8 @@ impl Export {
                 }
             } else if !trimmed.is_empty() {
                 text_content.push(format!("\t\t\t<p>{}</p>", line));
-            } else {
-                // blank line
-                text_content.push(String::from("\t\t\t<br>"));
             }
         }
-
-
-
-        // let text_content: Vec<_> = split_text
-        //     .clone()
-        //     .into_iter()
-        //     .enumerate()
-        //     .map(|(index, line)| {
-        //         if line.len() > 0 {
-        //             if line.starts_with("* ") {
-        //                 // parses list items
-        //                 if index != 0 && index < split_text.len() - 1 {
-        //                     if !split_text[index - 1].starts_with("* ") {
-        //                         format!("\t\t\t<ul><li>{}</li>", line.strip_prefix("* ").unwrap())
-        //                     }
-        //                     else if !split_text[index + 1].starts_with("* ") {
-        //                         format!("\t\t\t<li>{}</li></ul>", line.strip_prefix("* ").unwrap())
-        //                     }
-        //                     else {
-        //                         format!("\t\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
-        //                     };
-        //                 }
-        //                 format!("\t\t\t<li>{}</li>", line.strip_prefix("* ").unwrap())
-        //             }
-        //             else {
-        //                 // paragraph html element
-        //                 format!("\t\t\t<p>{}</p>", line)
-        //             }
-        //         }
-        //         else {
-        //             // blank line
-        //             String::from("\t\t\t<br>")
-        //         }
-        //     })
-        //     .collect();
         // creates a new line for html formatting purposes only
         let text_content = text_content.join("\n"); // no visual effect on page        
         
