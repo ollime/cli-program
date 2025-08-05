@@ -1,7 +1,6 @@
 use color_eyre::Result;
 use ratatui::DefaultTerminal;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-use scraper::{Html, Selector};
 
 use crate::export::Export;
 pub struct Tab {
@@ -64,42 +63,6 @@ impl App {
         self.running = true;
 
         let data: Vec<(String, String)> = Export::import_html().unwrap();
-        fn parse_html(text: &str) -> String {
-            let document = Html::parse_document(&text);
-            let select = Selector::parse("div.content-container").unwrap(); 
-            let mut final_text = String::from("");
-
-            if let Some(contents) = document.select(&select).next() {
-                let text = &contents.inner_html();
-                let split_text: Vec<&str> = text.split("\n").collect();
-
-                for paragraph in split_text {
-                    let remove_p = paragraph
-                    .replace("<p>", "")
-                    .replace("</p>", "\n")
-                    .replace("<ul>", "\n")
-                    .replace("</ul>", "\n")
-                    .replace("<br>", "")
-                    .trim()
-                    .to_string();
-
-                    let fragment = Html::parse_fragment(&remove_p);
-                    let select_li = Selector::parse("li").unwrap(); 
-
-                    let elements = fragment.select(&select_li);
-                    if elements.clone().count() > 0 {
-                        for element in elements {
-                            let text = &element.text().collect::<String>();
-                            final_text += &format!("* {}\n", text);
-                        }
-                    }
-                    else {
-                        final_text += &format!("{}\n", remove_p.trim());
-                    }
-                }
-            }
-            final_text
-        }
         for i in data {
             self.tabs.push(Tab {
                 tab_name: format!("{}",
@@ -108,10 +71,9 @@ impl App {
                     .or_else(|| i.0.strip_suffix(".txt"))
                     .unwrap_or(&i.0)
                 ),
-                text: format!("{}", parse_html(&i.1)),
+                text: format!("{}", Export::parse_html(&i.1)),
             });
         }
-
 
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;

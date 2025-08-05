@@ -6,6 +6,7 @@ use std::io::Write;
 use std::io::Read;
 use std::fs;
 use std::process::Command;
+use scraper::{Html, Selector};
 
 pub struct Export {
     
@@ -180,7 +181,7 @@ impl Export {
         <h1>{}</h1>
         </div>
         <div class=\"content-container\">
-    {}
+{}
         </div>
     </div>
   </body>
@@ -215,4 +216,41 @@ impl Export {
 
         Ok(data)
     }
+
+    pub fn parse_html(text: &str) -> String {
+            let document = Html::parse_document(&text);
+            let select = Selector::parse("div.content-container").unwrap(); 
+            let mut final_text = String::from("");
+
+            if let Some(contents) = document.select(&select).next() {
+                let text = &contents.inner_html();
+                let split_text: Vec<&str> = text.split("\n").collect();
+
+                for paragraph in split_text {
+                    let remove_p = paragraph
+                    .replace("<p>", "")
+                    .replace("</p>", "\n")
+                    .replace("<ul>", "\n")
+                    .replace("</ul>", "\n")
+                    .replace("<br>", "")
+                    .trim()
+                    .to_string();
+
+                    let fragment = Html::parse_fragment(&remove_p);
+                    let select_li = Selector::parse("li").unwrap(); 
+
+                    let elements = fragment.select(&select_li);
+                    if elements.clone().count() > 0 {
+                        for element in elements {
+                            let text = &element.text().collect::<String>();
+                            final_text += &format!("* {}\n", text);
+                        }
+                    }
+                    else {
+                        final_text += &format!("{}\n", remove_p.trim());
+                    }
+                }
+            }
+            final_text
+        }
 }
