@@ -22,7 +22,7 @@
 
 ## Installation
 
-1. Download & run the executable from the [releases page](https://github.com/ollime/cli-program/releases)
+1. Download & run [the .exe executable](https://github.com/ollime/cli-program/notes-cli-app.exe)
 
 2. From source:
 
